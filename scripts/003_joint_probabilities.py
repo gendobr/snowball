@@ -6,6 +6,7 @@ import configparser
 import lib.topicmodel as tm
 import jsonlines
 import os
+import psutil
 
 
 def joint_probabilities(config=None, outfile=None, infile=None, indictfile=None):
@@ -51,3 +52,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

@@ -7,6 +7,7 @@ import configparser
 import jsonlines
 import networkx as nx
 import lib.spc as spc
+import psutil
 
 
 def do_spc(config=None,
@@ -153,3 +154,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

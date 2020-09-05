@@ -6,6 +6,7 @@ import configparser
 import jsonlines
 import datetime
 import pandas as pd
+import psutil
 
 
 def do_export(config=None, outfile=None, initems=None):
@@ -371,3 +372,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

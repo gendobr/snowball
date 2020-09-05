@@ -15,6 +15,7 @@ import lib.nlp as nlp
 import re
 from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
+import psutil
 
 
 def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
@@ -93,3 +94,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

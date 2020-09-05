@@ -18,6 +18,7 @@ from nltk.stem.porter import PorterStemmer
 from nltk.corpus import stopwords
 import numpy
 import lib.measures as measures
+import psutil
 
 
 def snowball(config=None,
@@ -339,3 +340,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

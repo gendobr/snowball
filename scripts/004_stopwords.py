@@ -6,6 +6,7 @@ import lib.topicmodel as tm
 import time
 import fire
 import os
+import psutil
 
 
 def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddictfile=None):
@@ -69,3 +70,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

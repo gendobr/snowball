@@ -11,6 +11,7 @@ import json
 import jsonlines
 import csv
 import queue
+import psutil
 
 
 def snowball(config=None, outfile=None, infile=None):
@@ -176,3 +177,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

@@ -56,7 +56,7 @@ def clean_text(rawtxt):
 
     # if line starts with lowercase letter, join in with previous line
 
-    pattern_trash_string = r"^[+-,:;)%(|. 0-9]+$"
+    pattern_trash_string = r"^[+-,:;)%(/|. 0-9]+$"
     len_content = len(content)
     for i in range(1, len_content + 1):
         j = len_content - i

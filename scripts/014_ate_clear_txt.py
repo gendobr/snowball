@@ -1,18 +1,14 @@
-# import sys
-import os.path
 import time
 import fire
 import configparser
-import datetime
-import pandas as pd
+import psutil
 from os import listdir
 from os.path import isfile, join
 import os
-import lib.pdf2txt as pdf2txt
-# import lib.nlp as nlp
+import lib.cleartxt as cleartxt
 
 
-def do_pdf2txt(config=None, txtdir=None, pdfdir=None):
+def do_clear_txt(config=None, rawtxtdir=None, cleartxtdir=None):
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
@@ -21,44 +17,39 @@ def do_pdf2txt(config=None, txtdir=None, pdfdir=None):
 
     # =====================================================
     # place to store extracted texts
-    if txtdir:
-        txt_dir = txtdir
+    if cleartxtdir:
+        clear_txt_dir = cleartxtdir
     else:
-        txt_dir = f'{data_dir}/txts'
-    print(('txt_dir', txt_dir))
+        clear_txt_dir = f'{data_dir}/clear_txts'
+    print(('clear_txt_dir', clear_txt_dir))
     # =====================================================
 
     # =====================================================
-    # place to read pdfs
-    if pdfdir:
-        pdf_dir = pdfdir
+    # place to read raw texts
+    if rawtxtdir:
+        raw_txt_dir = rawtxtdir
     else:
-        pdf_dir = f'{data_dir}/pdfs'
-    print(('pdf_dir', pdf_dir))
+        raw_txt_dir = f'{data_dir}/txts'
+    print(('raw_txt_dir', raw_txt_dir))
     # =====================================================
 
     # =====================================================
-    # read pdf files
-    pdf_files = sorted([(pdfdir, f) for f in listdir(pdfdir) if isfile(join(pdfdir, f)) and f.lower().endswith(".pdf")])
-    print(pdf_files)
-    for f in pdf_files:
-        fpath_out = join(txtdir, f[1][:-4] + '.txt')
-        print(pdfdir, '/', f[1], "=>", fpath_out)
-        ftxt = open(fpath_out, 'wb')
+    # read raw txt files
+    raw_txt_files = sorted([(raw_txt_dir, f) for f in listdir(raw_txt_dir) if isfile(join(raw_txt_dir, f)) and f.lower().endswith(".txt")])
+    print(raw_txt_files)
+    for f in raw_txt_files:
+        fpath_out = join(clear_txt_dir, f[1][:-4] + '.txt')
+        print(raw_txt_dir, '/', f[1], "=>", fpath_out)
+        ftxt = open(fpath_out, 'w')
         try:
             # ftxt.write(ate.pdf_to_text_textract(join(f[0], f[1])).replace("\n"," "))
             # file_content=ate.pdf_to_text_pypdf(join(f[0], f[1]))
-            file_content = pdf2txt.pdf_to_text_textract(join(f[0], f[1]))
+            file_content = cleartxt.clean_text(join(f[0], f[1]))
             ftxt.write(file_content)
         except TypeError as e:
             print("error writing file " + fpath_out)
             print(e)
             print("\n\n")
-
-        # file_content=ate.pdf_to_text_textract(join(f[0], f[1]))
-        # file_content=ate.pdf_to_text_pypdf(join(f[0], f[1]))
-        # ftxt.write(file_content)
-
         ftxt.close()
 
     # =====================================================
@@ -66,7 +57,9 @@ def do_pdf2txt(config=None, txtdir=None, pdfdir=None):
 
 if __name__ == "__main__":
     t0 = time.time()
-    fire.Fire(do_pdf2txt)
+    fire.Fire(do_clear_txt)
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

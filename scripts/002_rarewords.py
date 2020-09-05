@@ -5,7 +5,7 @@ import time
 import fire
 import lib.topicmodel as tm
 import os
-import csv
+import psutil
 import jsonlines
 
 
@@ -80,3 +80,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

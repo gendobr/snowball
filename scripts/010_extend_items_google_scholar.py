@@ -4,8 +4,7 @@ import time
 import fire
 import configparser
 import jsonlines
-import json
-from lib.msacademic import Api
+import psutil
 import scholarly
 
 
@@ -111,3 +110,5 @@ if __name__ == "__main__":
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
