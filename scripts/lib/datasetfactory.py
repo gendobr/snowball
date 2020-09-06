@@ -60,6 +60,30 @@ def factory_citation_desc(txt_file_dir, dataset_file_dir, increment_size=1, meta
     __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
 
+def factory_spc_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    t0 = time.time()
+    # read metadata file
+    with jsonlines.open(metadata) as reader:
+        items = {str(row['id']): row for row in reader}
+
+    # get pairs (citation_index, file_path)
+    pairs = []
+    for item_id in items:
+        item = items[item_id]
+        txt_file_path = join(txt_file_dir, re.sub(r'\.pdf$', '.txt', item["pdf_file_name"]))
+        if isfile(txt_file_path):
+            try:
+                order_by = float(item["spc"])
+            except:
+                order_by = 0
+            pairs.append((order_by, txt_file_path,))
+
+    sorted_txt_files = sorted(pairs, reverse=True)
+    # print(sorted_txt_files)
+
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
 def factory_time_bidir(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
     t0 = time.time()
     # read metadata file

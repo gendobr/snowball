@@ -51,6 +51,9 @@ def do_generate_datasets(config=None,
         dsf.factory_citation_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'citation-per-year-desc':
         dsf.factory_citation_per_year_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'spc-desc':
+        dsf.factory_spc_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size,
+                                       metadata=metadatafile)
     elif strategy == 'time-desc':
         dsf.factory_time_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'time-asc':

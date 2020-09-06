@@ -5,5 +5,4 @@ pipenv run python \
                    --cleartxtdir=../data/GAN/clear_txts  \
                    --increment_size=20  \
                    --metadatafile=../data/GAN/011_download_pdfs.jsonl  \
-                   --strategy="citation-per-year-desc"
-
+                   --strategy="spc-desc"
