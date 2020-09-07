@@ -19,9 +19,10 @@ scholarly = "*"
 free-proxy = "*"
 openpyxl = "*"
 textract = "*"
-pypdf2 = "*"
 pyahocorasick = "*"
 psutil = "*"
+pymupdf = "*"
+ftfy = "*"
 
 [requires]
 python_version = "3"
