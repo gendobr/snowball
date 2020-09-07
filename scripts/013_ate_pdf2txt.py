@@ -4,6 +4,7 @@ import configparser
 from os import listdir
 from os.path import isfile, join
 import psutil
+import os
 import lib.pdf2txt as pdf2txt
 
 
@@ -43,7 +44,28 @@ def do_pdf2txt(config=None, txtdir=None, pdfdir=None):
         try:
             # ftxt.write(ate.pdf_to_text_textract(join(f[0], f[1])).replace("\n"," "))
             # file_content=ate.pdf_to_text_pypdf(join(f[0], f[1]))
-            file_content = pdf2txt.pdf_to_text_textract(join(f[0], f[1]))
+            # file_content = pdf2txt.pdf_to_text_textract(join(f[0], f[1]))
+            file_content = ''
+            # try:
+            #     file_content = pdf2txt.pdf_to_text_pycpdf(join(f[0], f[1]))
+            #     print('pdf_to_text_pycpdf')
+            # except:
+            #     file_content = ''
+
+            if len(file_content) == 0:
+                try:
+                    file_content = pdf2txt.pdf_to_text_pymupdf(join(f[0], f[1]))
+                    print('pdf_to_text_pymupdf')
+                except:
+                    file_content = ''
+                
+            if len(file_content) == 0:
+                try:
+                    file_content = pdf2txt.pdf_to_text_textract(join(f[0], f[1]))
+                    print('pdf_to_text_textract')
+                except:
+                    file_content = ''
+
             ftxt.write(file_content)
         except TypeError as e:
             print("error writing file " + fpath_out)
