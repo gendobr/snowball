@@ -94,8 +94,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 print(items[item_id]['google_scholar'])
                 pass
             except:
-               pass
                print('ERROR')
+               break
 
     with jsonlines.open(file_path_output, mode='a') as writer:
         for item_id in items:
