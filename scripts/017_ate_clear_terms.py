@@ -8,7 +8,7 @@ import os
 import psutil
 import jsonlines
 from nltk.stem.porter import *
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 
 
 
@@ -31,7 +31,7 @@ def do_get_terms(config=None,
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
-    data_dir = conf.get('main', 'data_dir')
+    # data_dir = conf.get('main', 'data_dir')
     trace = (int(trace) == 1)
 
     with jsonlines.open(in_terms) as reader:
@@ -40,17 +40,17 @@ def do_get_terms(config=None,
     f_stopwords = open(stopwords, 'r')
     stopwords = [r.strip() for r in f_stopwords.readlines() if len(r.strip()) > 0]
     f_stopwords.close()
-    stemmer = PorterStemmer()
+    # stemmer = PorterStemmer()
+    # def has_stopwords(wrd):
+    #     ws = str(wrd).split(' ')
+    #     for w in ws:
+    #         w_stemmed = stemmer.stem(w).encode('utf-8')
+    #         if w_stemmed in stopwords:
+    #             return True
+    #     return False
+    # clear_terms = [row for row in terms if not has_stopwords(row[0])]
 
-    def has_stopwords(wrd):
-        ws = str(wrd).split(' ')
-        for w in ws:
-            w_stemmed = stemmer.stem(w).encode('utf-8')
-            if w_stemmed in stopwords:
-                return True
-        return False
-
-    clear_terms = [row for row in terms if not has_stopwords(row[0])]
+    clear_terms = [row for row in terms if row[0] not in stopwords]
 
     with jsonlines.open(out_terms, mode='w') as writer:
         for cv in clear_terms:
