@@ -95,7 +95,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 pass
             except:
                print('ERROR')
-               # break
+               break
 
     with jsonlines.open(file_path_output, mode='a') as writer:
         for item_id in items:
