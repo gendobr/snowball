@@ -6,9 +6,10 @@ import configparser
 import jsonlines
 import psutil
 import scholarly
+import sys
 
 
-def do_extension(config=None, outfile=None, initems=None, searchauthor='1', searchtitle='1'):
+def do_extension(config=None, outfile=None, initems=None, searchauthor='1', searchtitle='1', searchvenue='0'):
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
@@ -47,10 +48,13 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     proxy = conf.get('google_scholar', 'proxy')
     scholarly.scholarly.use_proxy(http=proxy)
 
+    n_errors = 0
     for item_id in items:
 
+        print(('extending', 'item_id', item_id))
+
         if 'google_scholar' in items[item_id]:
-            print(('item_id', item_id, 'skip'))
+            print(('skip', 'item_id', item_id, ))
             continue
 
         google_search_string = list()
@@ -68,14 +72,16 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
             except:
                 pass
 
-        # try:
-        #     item_venue = items[item_id]["venue_full_name"]
-        #     google_search_string.append(f'''source:"{item_venue}"''')
-        # except:
-        #     pass
+        if searchvenue == '1':
+            try:
+                item_venue = items[item_id]["venue_full_name"]
+                google_search_string.append(f'''source:"{item_venue}"''')
+            except:
+                pass
+
         if len(google_search_string) > 0:
             google_search_string = " ".join(google_search_string)
-            print(('google_search_string', google_search_string, ))
+            print(('searching', 'google_search_string', google_search_string, ))
             try:
                 search_query = scholarly.scholarly.search_pubs(google_search_string)
                 pub = next(search_query)
@@ -92,11 +98,20 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                     bibtex=pub.bibtex,
                 )
                 print(items[item_id]['google_scholar'])
-                pass
+                n_errors = 0
             except:
-               print('ERROR')
-               break
+                n_errors += 1
+                print("ERROR", sys.exc_info()[0])
+                if n_errors > 10:
+                    __save_items(file_path_output, items)
+                    break
+        else:
+            print('ERROR', 'message', 'google_search_string is empty')
 
+    __save_items(file_path_output, items)
+
+
+def __save_items(file_path_output, items):
     with jsonlines.open(file_path_output, mode='a') as writer:
         for item_id in items:
             item = items[item_id]
