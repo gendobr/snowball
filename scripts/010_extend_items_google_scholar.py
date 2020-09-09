@@ -101,7 +101,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 n_errors = 0
             except:
                 n_errors += 1
-                print("ERROR", sys.exc_info()[0])
+                ex = sys.exc_info()
+                print("ERROR", ex[0], ex[1], ex[2])
                 if n_errors > 10:
                     __save_items(file_path_output, items)
                     break
