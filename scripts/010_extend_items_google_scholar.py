@@ -6,7 +6,7 @@ import configparser
 import jsonlines
 import psutil
 import scholarly
-import sys, traceback
+import sys, traceback, random
 
 
 def do_extension(config=None, outfile=None, initems=None, searchauthor='1', searchtitle='1', searchvenue='0'):
@@ -46,7 +46,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     # place here Google Scholar calls to extract citation index
     # ! maybe proxy is needed
     proxy = conf.get('google_scholar', 'proxy')
-    scholarly.scholarly.use_proxy(http=proxy)
+    if len(proxy) > 0:
+        scholarly.scholarly.use_proxy(http=proxy)
 
     n_errors = 0
     for item_id in items:
@@ -99,6 +100,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 )
                 print(items[item_id]['google_scholar'])
                 n_errors = 0
+                time.sleep(18+5*random.random())
             except:
                 n_errors += 1
                 ex = sys.exc_info()
