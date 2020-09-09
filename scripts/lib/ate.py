@@ -390,7 +390,7 @@ class TermExtractor:
                 # break
 
         """
-        returns sorted list of tuples (Cvalue, candidate_term)
+        returns sorted list of tuples (candidate_term, Cvalue)
         """
         return sorted(zip([x.strip() for x in term_series], c_values), key=lambda x: x[1], reverse=True)
     # sentences[0:10]
