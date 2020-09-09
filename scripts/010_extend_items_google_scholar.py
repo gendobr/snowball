@@ -114,7 +114,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
 
 
 def __save_items(file_path_output, items):
-    with jsonlines.open(file_path_output, mode='a') as writer:
+    with jsonlines.open(file_path_output, mode='w') as writer:
         for item_id in items:
             item = items[item_id]
             print(('id', item['id'], 'year', item['year'], 'title', item['title']))
