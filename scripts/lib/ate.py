@@ -190,6 +190,11 @@ class StopWordsDetector:
 
 
 class TermExtractor:
+    """
+    Sample call
+    terms = term_extractor.extract_terms(doc_txt, trace=trace)
+    c_values = term_extractor.c_values(terms, trace=trace)   # replace this line
+    """
     def __init__(self, stopwords=[], term_patterns=[], min_term_length=3, min_term_words=2):
         # StopWordsDetector
         self.stopwords = set(stopwords)
@@ -204,31 +209,54 @@ class TermExtractor:
         self.swd = StopWordsDetector(self.stopwords)
 
     def extract_terms(self, doc_txt, trace=False):
+        """
+
+        :param doc_txt:  List of document lines. Each line contains one or more sentences.
+        :param trace:
+        :return:
+        """
         sent_tokenize_list = filter(lambda x: len(x) > 0, map(lambda s: nltk.tokenize.sent_tokenize(s), doc_txt))
+
+        # compose list of sentences
         sentences = []
         _ = [sentences.extend(lst) for lst in sent_tokenize_list]
         if trace:
             print('len(sentences)=' + str(len(sentences)))
 
+        # create list of candidate terms
         terms = []  # pd.DataFrame(columns=['term'])
         # sentences = sentences[:30]
 
         i = 1
+        # to filter candidate terms by length
         filter_fn = lambda x: len(x) >= self.min_term_length
         max_i = len(sentences)
         for s in sentences:
+            # split sentence into list of words (word has the str type)
             text = nltk.word_tokenize(s)
-            # sent_pos_tags=nltk.pos_tag(text, tagset='universal')
+            # print(('text', text))
+
+            # apply NLTK tokenizer
+            # input: list of words
+            # output: list of tuples (word, POS_tag)
             sent_pos_tags = self.pos_tagger.tag(text)
+            # print( ('sent_pos_tags', sent_pos_tags) )
+
+            # apply linguistic filters to list of POS tagged words
             sentence_terms = set()
             for fsa1 in self.detectors:
+                # stn
                 stn = filter(filter_fn, [' '.join(t) for t in fsa1.detect(sent_pos_tags) if
                                          len(t) >= self.min_term_words and len(self.swd.detect(t)) == 0])
                 sentence_terms.update(stn)
+            # print( ('sentence_terms', sentence_terms))
+
             terms.extend([str(trm).strip() for trm in sentence_terms])
             if trace:
                 print(i, '/', max_i, s)
             i = i + 1
+
+        """ terms is list of strings. each string is candidate term"""
         return terms
 
     '''
@@ -239,18 +267,50 @@ class TermExtractor:
         terms_df = pd.DataFrame(terms, columns=['term'])
         terms_df['w'] = 1
         terms_df['len'] = len(terms_df['term'])
+        """
+        terms_df is
+                                term  w    len
+        0        feature hierarchies  1  20552
+        1   rich feature hierarchies  1  20552
+        2  accurate object detection  1  20552
+        3      semantic segmentation  1  20552
+        4             ross girshick1  1  20552
+
+        w is always "1"
+        len is number of candidate terms
+        """
+
         term_stats = terms_df.groupby(['term'])['w'].agg([np.sum])
         term_stats['len'] = list(pd.Series(term_stats.index).apply(lambda x: len(x)))
+        """
+        term_stats is
+        term                                                sum  len                                                        
+        1 i1 r                                                1    6
+        1000class imagenet benchmark                          1   28
+        1000class imagenet large scale visual recogniti...    1   59
+        1000class imagenet object recognition challenge       1   47
+        1000class imagenet task                               1   23
+        
+        "term" is candidate term, primary key, values of "term" column are unique 
+        "sum"  is term frequency
+        "len"  is length of candidate term
+        """
 
+        # term_series is list of candidate terms
         term_series = list(term_stats.index)
+
+        # n_terms is number of candidate terms
         n_terms = len(term_series)
 
+        # all spaces to simplify calculation
         for i in range(0, n_terms):
             term_series[i] = ' ' + str(term_series[i]) + ' '
 
+        # replace index
         term_stats['trm'] = term_series
         term_stats.set_index('trm', inplace=True)
 
+        # create finite state automata
         A = ahocorasick.Automaton()
         for i in range(0, n_terms):
             A.add_word(term_series[i], (i, term_series[i]))
@@ -264,6 +324,26 @@ class TermExtractor:
                     # print original_value, "insideof ", haystack
                     is_part_of.append((original_value, haystack, 1))
         subterms = pd.DataFrame(is_part_of, columns=['term', 'part_of', 'w']).set_index(['term', 'part_of'])
+        """
+        subterms is
+        
+        term                                               part_of                                             w 
+         imagenet benchmark                                 1000class imagenet benchmark                       1
+         imagenet large                                     1000class imagenet large scale visual recognit...  1
+         large scale                                        1000class imagenet large scale visual recognit...  1
+         visual recognition                                 1000class imagenet large scale visual recognit...  1
+         imagenet large scale visual recognition challe...  1000class imagenet large scale visual recognit...  1
+        ...                                                                                                   ..
+         reconstruction loss                                ℓ1 reconstruction loss                             1
+         error                                              ℓ2 error                                           1
+         reconstruction                                     ℓ2 pixelwise reconstruction loss                   1
+         pixelwise reconstruction loss                      ℓ2 pixelwise reconstruction loss                   1
+         reconstruction loss                                ℓ2 pixelwise reconstruction loss                   1
+
+        "w" is term frequency
+        """
+        # print("-------------")
+        # print(subterms)
 
         if trace:
             print("terms/subterms relations discovered ...")
@@ -273,11 +353,29 @@ class TermExtractor:
         for t in term_series:
             if t in term_stats.index:
                 current_term = term_stats.loc[t]
-                # average frequency of the superterms
+                """
+                print("-------------")
+                print(('t', t, 'current_term', current_term))
+
+                ('t', ' belief network ', 
+                'current_term', sum     1
+                                len    14
+                                Name:  belief network , dtype: int64)
+                t is string
+                current_term = {sum:1, len:14}
+                """
+
+                # calculate average frequency of the superterms
                 c_value = 0
                 if t in subterms.index:
                     subterm_of = list(subterms.loc[t].index)
+                    """
+                    print(('subterm_of', subterm_of))
+                    ('subterm_of', [' deep belief network ', ' directed sigmoid belief network ', ' sigmoid belief network '])
+
+                    """
                     for st in subterm_of:
+                        # term_stats.loc[st]['sum'] is frequency of superterm
                         c_value -= term_stats.loc[st]['sum']
                     c_value /= float(len(subterm_of))
 
@@ -291,6 +389,9 @@ class TermExtractor:
                 c_values.append(c_value)
                 # break
 
+        """
+        returns sorted list of tuples (candidate_term, Cvalue)
+        """
         return sorted(zip([x.strip() for x in term_series], c_values), key=lambda x: x[1], reverse=True)
     # sentences[0:10]
     # print self.stopwords
