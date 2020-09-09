@@ -6,7 +6,7 @@ import configparser
 import jsonlines
 import psutil
 import scholarly
-import sys
+import sys, traceback
 
 
 def do_extension(config=None, outfile=None, initems=None, searchauthor='1', searchtitle='1', searchvenue='0'):
@@ -103,6 +103,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 n_errors += 1
                 ex = sys.exc_info()
                 print("ERROR", ex[0], ex[1], ex[2])
+                traceback.print_exc(file=sys.stdout)
                 if n_errors > 10:
                     __save_items(file_path_output, items)
                     break
