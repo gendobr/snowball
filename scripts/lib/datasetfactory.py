@@ -9,7 +9,80 @@ import jsonlines
 import re
 
 
+
+
+
+def partial_factory_citation_per_year_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_citation_per_year_desc(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def partial_factory_citation_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_citation_desc(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def partial_factory_spc_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_spc_desc(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def partial_factory_time_bidir(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_bidir(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def partial_factory_random(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    pairs = __sort_random(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(pairs, increment_size, dataset_file_dir)
+
+
+def partial_factory_time_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_desc(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def partial_factory_time_asc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_asc(txt_file_dir, metadata=metadata)
+    __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
 def factory_citation_per_year_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_citation_per_year_desc(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def factory_citation_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_citation_desc(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def factory_spc_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_spc_desc(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def factory_time_bidir(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_bidir(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def factory_random(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    pairs = __sort_random(txt_file_dir, metadata=metadata)
+    __create_datasets(pairs, increment_size, dataset_file_dir)
+
+
+def factory_time_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_desc(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def factory_time_asc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+    sorted_txt_files = __sort_time_asc(txt_file_dir, metadata=metadata)
+    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+
+
+def __sort_citation_per_year_desc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -32,11 +105,10 @@ def factory_citation_per_year_desc(txt_file_dir, dataset_file_dir, increment_siz
 
     sorted_txt_files = sorted(pairs, reverse=True)
     # print(sorted_txt_files)
+    return sorted_txt_files
 
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
-
-def factory_citation_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_citation_desc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -56,11 +128,10 @@ def factory_citation_desc(txt_file_dir, dataset_file_dir, increment_size=1, meta
 
     sorted_txt_files = sorted(pairs, reverse=True)
     # print(sorted_txt_files)
+    return sorted_txt_files
 
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
-
-def factory_spc_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_spc_desc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -80,11 +151,10 @@ def factory_spc_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=
 
     sorted_txt_files = sorted(pairs, reverse=True)
     # print(sorted_txt_files)
+    return sorted_txt_files
 
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
-
-def factory_time_bidir(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_time_bidir(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -110,11 +180,10 @@ def factory_time_bidir(txt_file_dir, dataset_file_dir, increment_size=1, metadat
         i2 = n_files - i1 - 1
         sorted_txt_files.append(pairs[i2])
     # print(sorted_txt_files)
+    return sorted_txt_files
 
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
-
-def factory_random(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_random(txt_file_dir, metadata=False):
 
     t0 = time.time()
     # read metadata file
@@ -134,12 +203,11 @@ def factory_random(txt_file_dir, dataset_file_dir, increment_size=1, metadata=Fa
             pairs.append((order_by, txt_file_path,))
 
     random.shuffle(pairs)
-    # print(sorted_txt_files)
+    # print(pairs)
+    return pairs
 
-    __create_datasets(pairs, increment_size, dataset_file_dir)
 
-
-def factory_time_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_time_desc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -159,11 +227,10 @@ def factory_time_desc(txt_file_dir, dataset_file_dir, increment_size=1, metadata
 
     sorted_txt_files = sorted(pairs)
     # print(sorted_txt_files)
+    return sorted_txt_files
 
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
 
-
-def factory_time_asc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=False):
+def __sort_time_asc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
     with jsonlines.open(metadata) as reader:
@@ -183,8 +250,7 @@ def factory_time_asc(txt_file_dir, dataset_file_dir, increment_size=1, metadata=
 
     sorted_txt_files = sorted(pairs)
     # print(sorted_txt_files)
-
-    __create_datasets(sorted_txt_files, increment_size, dataset_file_dir)
+    return sorted_txt_files
 
 
 def __create_datasets(sorted_txt_files, increment_size, dataset_file_dir):
@@ -193,6 +259,24 @@ def __create_datasets(sorted_txt_files, increment_size, dataset_file_dir):
     n_dataset = 0
     for chunk in __get_chunks(sorted_txt_files, increment_size):
         n_dataset += 1
+        for pair in chunk:
+            with open(pair[1]) as fl:
+                dataset += fl.read()
+        fnm = join(dataset_file_dir, 'D' + (('00000000000000000' + str(n_dataset))[-10:]) + '.txt')
+        fl = open(fnm, 'w')
+        fl.write(dataset)
+        fl.close()
+        t1 = time.time()
+        print(n_dataset, fnm, t1 - t0, 'sec', chunk)
+        print("\n")
+
+
+def __create_partial_datasets(sorted_txt_files, increment_size, dataset_file_dir):
+    t0 = time.time()
+    n_dataset = 0
+    for chunk in __get_chunks(sorted_txt_files, increment_size):
+        n_dataset += 1
+        dataset = ''
         for pair in chunk:
             with open(pair[1]) as fl:
                 dataset += fl.read()

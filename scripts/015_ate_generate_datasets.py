@@ -18,7 +18,9 @@ def do_generate_datasets(config=None,
     :param datasetdir:
     :param cleartxtdir:
     :param increment_size:
-    :param strategy: time-asc | time-desc | random | time-bidir | citation-desc
+    :param strategy: citation-desc|citation-per-year-desc|spc-desc|time-desc|time-asc|time-bidir|random
+                    |partial-citation-desc|partial-citation-per-year-desc|partial-spc-desc
+                    |partial-time-desc|partial-time-asc|partial-time-bidir|partial-random
     :return:
     """
     # read configuration file
@@ -52,8 +54,7 @@ def do_generate_datasets(config=None,
     elif strategy == 'citation-per-year-desc':
         dsf.factory_citation_per_year_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'spc-desc':
-        dsf.factory_spc_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size,
-                                       metadata=metadatafile)
+        dsf.factory_spc_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'time-desc':
         dsf.factory_time_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'time-asc':
@@ -62,6 +63,20 @@ def do_generate_datasets(config=None,
         dsf.factory_time_bidir(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'random':
         dsf.factory_random(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-citation-desc':
+        dsf.partial_factory_citation_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-citation-per-year-desc':
+        dsf.partial_factory_citation_per_year_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-spc-desc':
+        dsf.partial_factory_spc_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-time-desc':
+        dsf.partial_factory_time_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-time-asc':
+        dsf.partial_factory_time_asc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-time-bidir':
+        dsf.partial_factory_time_bidir(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
+    elif strategy == 'partial-random':
+        dsf.partial_factory_random(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
 #
 
 if __name__ == "__main__":

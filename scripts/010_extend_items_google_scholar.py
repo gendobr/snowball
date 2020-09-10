@@ -87,15 +87,15 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 search_query = scholarly.scholarly.search_pubs(google_search_string)
                 pub = next(search_query)
                 items[item_id]['google_scholar'] = dict(
-                    abstract=pub.bib['abstract'],
-                    author=pub.bib['author'],
-                    cites=pub.bib['cites'],
-                    eprint=pub.bib['eprint'],
-                    gsrank=pub.bib['gsrank'],
-                    title=pub.bib['title'],
-                    url=pub.bib['url'],
-                    venue=pub.bib['venue'],
-                    year=pub.bib['year'],
+                    abstract=pub.bib['abstract'] if 'abstract' in pub.bib else '',
+                    author=pub.bib['author'] if 'author' in pub.bib else '',
+                    cites=pub.bib['cites'] if 'cites' in pub.bib else '',
+                    eprint=pub.bib['eprint'] if 'eprint' in pub.bib else '',
+                    gsrank=pub.bib['gsrank'] if 'gsrank' in pub.bib else '',
+                    title=pub.bib['title'] if 'title' in pub.bib else '',
+                    url=pub.bib['url'] if 'url' in pub.bib else '',
+                    venue=pub.bib['venue'] if 'venue' in pub.bib else '',
+                    year=pub.bib['year'] if 'year' in pub.bib else '',
                     bibtex=pub.bibtex,
                 )
                 print(items[item_id]['google_scholar'])

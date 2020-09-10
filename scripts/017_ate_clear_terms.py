@@ -11,8 +11,7 @@ from nltk.stem.porter import *
 # from nltk.corpus import stopwords
 
 
-
-def do_get_terms(config=None,
+def do_clear_terms(config=None,
                  in_terms=None,  #
                  out_terms=None,
                  stopwords=None,
@@ -59,7 +58,7 @@ def do_get_terms(config=None,
 
 if __name__ == "__main__":
     t0 = time.time()
-    fire.Fire(do_get_terms)
+    fire.Fire(do_clear_terms)
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
