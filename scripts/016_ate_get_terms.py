@@ -9,11 +9,13 @@ import os
 import psutil
 import json
 import jsonlines
+from os import listdir
+from os.path import isfile, join
 
 
 def do_get_terms(config=None,
-                 in_dataset=None,  #
-                 out_terms=None,
+                 in_dir_dataset=None,  #
+                 out_dir_terms=None,
                  stopwords=None,
                  trace=0
                  ):
@@ -44,31 +46,39 @@ def do_get_terms(config=None,
     stopwords = [r.strip() for r in f_stopwords.readlines() if len(r.strip()) > 0]
     f_stopwords.close()
 
-    fp = open(in_dataset, "r")
-    doc_txt = fp.read()
-    fp.close()
-    # doc_txt = unicode(doc_txt, "utf-8", errors='replace').replace(u'\ufffd', '_')
-    doc_txt = doc_txt.replace(u'\ufffd', '_')
-    doc_txt = re.sub(r'et +al\.', 'et al', doc_txt)
-    doc_txt = re.split(r'[\r\n]', doc_txt)
+    in_dataset_files = sorted([f for f in listdir(in_dir_dataset) if f.lower().endswith(".txt")])
 
-    # print('len(text)=' + str( len(doc_txt) ) )
+    for in_dataset_file in in_dataset_files:
+        in_dataset = join(in_dir_dataset, in_dataset_file)
+        print(in_dataset)
+        if not isfile(in_dataset):
+            continue
 
-    term_extractor = ate.TermExtractor(
-        stopwords=stopwords, term_patterns=term_patterns,
-        min_term_words=min_term_words, min_term_length=min_term_length
-    )
-    terms = term_extractor.extract_terms(doc_txt, trace=trace)
-    print('len(terms)=' + str(len(terms)))
-    if trace:
-        # print terms[:10]
-        print("Term extraction finished")
+        fp = open(in_dataset, "r")
+        doc_txt = fp.read()
+        fp.close()
+        doc_txt = doc_txt.replace(u'\ufffd', '_')
+        doc_txt = re.sub(r'et +al\.', 'et al', doc_txt)
+        doc_txt = re.split(r'[\r\n]', doc_txt)
 
-    c_values = term_extractor.c_values(terms, trace=trace)   # replace this line
+        # print('len(text)=' + str( len(doc_txt) ) )
 
-    with jsonlines.open(out_terms, mode='w') as writer:
-        for cv in c_values:
-            writer.write(cv)
+        term_extractor = ate.TermExtractor(
+            stopwords=stopwords, term_patterns=term_patterns,
+            min_term_words=min_term_words, min_term_length=min_term_length
+        )
+        terms = term_extractor.extract_terms(doc_txt, trace=trace)
+        print('len(terms)=' + str(len(terms)))
+        if trace:
+            # print terms[:10]
+            print("Term extraction finished")
+
+        c_values = term_extractor.c_values(terms, trace=trace)   # replace this line
+
+        out_terms_file = join(out_dir_terms, 'T' + in_dataset_file[1:])
+        with jsonlines.open(out_terms_file, mode='w') as writer:
+            for cv in c_values:
+                writer.write(cv)
 
 
 if __name__ == "__main__":

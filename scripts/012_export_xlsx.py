@@ -172,13 +172,13 @@ def do_export(config=None, outfile=None, initems=None):
         #                            # formula is: Citation-Count-(U) / (&lt;current year&gt; - Publication-Year-(A)+1).
         citations_per_year = 0
         try:
-            citations_per_year = citations / ( now_year - int(item["year"]) + 1)
+            citations_per_year = citations / (now_year - int(item["year"]) + 1)
         except:
             pass
         flat_item.append(citations_per_year)
 
         #         'Document file name',       # W
-        flat_item.append(item["pdf_file_name"])
+        flat_item.append(item.get("pdf_file_name"))
 
         #         'MSR Entry (URL)',          # X The URL for the document description at MSR.
         flat_item.append(item["url"])

@@ -2,18 +2,19 @@
 import fire
 import configparser
 import time
-import lib.ate as ate
-import re
+# import lib.ate as ate
+# import re
 import os
 import psutil
 import jsonlines
 from nltk.stem.porter import *
-# from nltk.corpus import stopwords
+from os import listdir
+from os.path import isfile, join
 
 
 def do_clear_terms(config=None,
-                 in_terms=None,  #
-                 out_terms=None,
+                 in_dir_terms=None,  #
+                 out_dir_terms=None,
                  stopwords=None,
                  trace=0
                  ):
@@ -33,27 +34,34 @@ def do_clear_terms(config=None,
     # data_dir = conf.get('main', 'data_dir')
     trace = (int(trace) == 1)
 
-    with jsonlines.open(in_terms) as reader:
-        terms = [row for row in reader]
-
     f_stopwords = open(stopwords, 'r')
     stopwords = [r.strip() for r in f_stopwords.readlines() if len(r.strip()) > 0]
     f_stopwords.close()
-    # stemmer = PorterStemmer()
-    # def has_stopwords(wrd):
-    #     ws = str(wrd).split(' ')
-    #     for w in ws:
-    #         w_stemmed = stemmer.stem(w).encode('utf-8')
-    #         if w_stemmed in stopwords:
-    #             return True
-    #     return False
-    # clear_terms = [row for row in terms if not has_stopwords(row[0])]
 
-    clear_terms = [row for row in terms if row[0] not in stopwords]
+    in_term_files = sorted([f for f in listdir(in_dir_terms) if f.lower().endswith(".txt")])
 
-    with jsonlines.open(out_terms, mode='w') as writer:
-        for cv in clear_terms:
-            writer.write(cv)
+    for in_term_file in in_term_files:
+        in_terms = join(in_dir_terms, in_term_file)
+        print(in_terms)
+        with jsonlines.open(in_terms) as reader:
+            terms = [row for row in reader]
+
+
+        # stemmer = PorterStemmer()
+        # def has_stopwords(wrd):
+        #     ws = str(wrd).split(' ')
+        #     for w in ws:
+        #         w_stemmed = stemmer.stem(w).encode('utf-8')
+        #         if w_stemmed in stopwords:
+        #             return True
+        #     return False
+        # clear_terms = [row for row in terms if not has_stopwords(row[0])]
+
+        clear_terms = [row for row in terms if row[0] not in stopwords]
+        out_terms = join(out_dir_terms, in_term_file)
+        with jsonlines.open(out_terms, mode='w') as writer:
+            for cv in clear_terms:
+                writer.write(cv)
 
 
 if __name__ == "__main__":
