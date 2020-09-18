@@ -329,6 +329,8 @@ def snowball(config=None,
                 for entry_id in known_ids:
                     writer.writerow([entry_id])
 
+            if len(done_ids) >= 20000:
+                break
         cnt += 1
     # /snowball loop
     # =====================================================
