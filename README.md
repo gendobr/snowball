@@ -1,5 +1,6 @@
 # snowball
-Set of python scripts to implement the controlled snowball sampling to gather collection of the seminal scientific publications on desired subject
+Set of python scripts to implement the controlled snowball sampling to gather collection of the seminal scientific publications on desired subject. Details of the approach are available in the
+[publications](https://academic.microsoft.com/author/2765430366/publication/search?q=Hennadii%20Dobrovolskyi&qe=Composite(AA.AuId%253D2765430366)&f=&orderBy=0&paperId=2899429816)
 
 Requirements:
 To run the package you need 
