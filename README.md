@@ -41,7 +41,7 @@ Quick start:
 
 3) install all required python packages with 
    ```
-   pipenv install
+   $ pipenv install
    ```
    
 4) download the required NLTK packages
