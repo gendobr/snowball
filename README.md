@@ -32,7 +32,7 @@ Quick start:
 
 2) copy the directory ./docs/data into  ./data/YOUR_DATA_DIRECTORY
    ```
-   $ cp -R docs/data ./data/example
+   $ cp -R ./docs/data ./data/YOUR_DATA_DIRECTORY
    ```
    and paste the MS Academic Search API key as value of 
    `subscriptionKey` parameter in the configuration file
@@ -82,6 +82,9 @@ inside each file
 - 011_download_pdfs.sh - downloads PDF files that are available for free
 - 012_export_xlsx.sh - creates the final report according to `./docs/data-requirements.txt`
 
+Final list of publications is the file `012_exported.xlsx` that is `--outfile` parameter
+in the `012_export_xlsx.sh` script.
+
 
 7) Optionally, you can extended pipeline with ATE step
 - 013_ate_pdf2txt.sh
@@ -94,22 +97,3 @@ inside each file
 - 017_ate_clear_terms.sh
 - 018_ate_saturation.sh              
 
-
-
-0) you need NLTK and numpy to run the scripts below.
-1) get MS Academic API key ( https://azure.microsoft.com/en-us/services/cognitive-services/academic-knowledge/ )
-2) copy config-sample.ini to config.ini and update config.ini
-3) set desired MS Academic topics in the file data/in-include-topics.txt
-4) set undesired MS Academic topics in the file data/in-exclude-topics.txt
-5) paste MS Academic Ids into data/in-seed.csv , one ID per row
-6) run sequentially the following files
-* 000_download.py
-* 001_tokenizer.py
-* 002_rarewords.py
-* 003_joint_probabilities.py
-* 004_stopwords.py
-* 005_reduced_joint_probabilities.py
-* 007_SSNMF.py
-* 008_show_topic_coherence.py
-* 009_restricted_snowball.py
-* 010_search_path_count.py
