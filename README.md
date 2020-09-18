@@ -66,34 +66,30 @@ Quick start:
 6) run one-after-one the following files (don't forget to change the `../data/GAN/` to `../data/YOUR_DATA_DIRECTORY/` )
 inside each file
 
-- 000_download.sh  - may take several hours time to download up to 20000 baseline publications
-- 001_tokenizer.sh - perform tokenization step using NLTK tools
-- 002_rarewords.sh - detect rare words
-- 003_joint_probabilities.sh - estimate token co-occurrence probabilities
-- 004_stopwords.sh - detect stopwords
-- 005_reduced_joint_probabilities.sh - estimate token co-occurrence probabilities after
-- 006_SSNMF.sh  - creates topic model in 1-2 hours
-- 007_restricted_snowball.sh   - may take several hours time to download up to 20000 relevant publications
-- 008_search_path_count.sh
-- 009_extend_items.sh
-- 010_extend_items_google_scholar.sh - the script downloads several hundreds publcations from Google Scholar, so you must use proxy to avoid the ban. The proxy address is *proxy* parameter in the configuration file
+- `000_download.sh`  - may take several hours time to download up to 20000 baseline publications
+- `001_tokenizer.sh` - performs tokenization step using NLTK tools
+- `002_rarewords.sh` - detects rare words
+- `003_joint_probabilities.sh` - estimates token co-occurrence probabilities
+- `004_stopwords.sh` - detects stopwords
+- `005_reduced_joint_probabilities.sh` - estimates token co-occurrence probabilities after the rare words and stopwords excluded
+- `006_SSNMF.sh`  - creates topic model in 1-2 hours
+- `007_restricted_snowball.sh`   - may take several hours time to download up to 20000 relevant publications
+- `008_search_path_count.sh` - does search path count calculation (see. [Main path analysis](https://en.wikipedia.org/wiki/Main_path_analysis) for explanation)
+- `009_extend_items.sh` - adds mode metadata to selected publications
+- `010_extend_items_google_scholar.sh` - the script downloads several hundreds publications from Google Scholar, so you must use proxy to avoid the ban. The proxy address is *proxy* parameter in the configuration file.
    `./data/YOUR_DATA_DIRECTORY/config.ini`
-- 010_extend_items_google_scholar_resume.sh - sometimes you need to resume the previous command
-- 011_download_pdfs.sh - downloads PDF files that are available for free
-- 012_export_xlsx.sh - creates the final report according to `./docs/data-requirements.txt`
+- `010_extend_items_google_scholar_resume.sh` - sometimes you need to resume the previous command
+- `011_download_pdfs.sh` - downloads PDF files that are available for free
+- `012_export_xlsx.sh` - creates the final report according to `./docs/data-requirements.txt`
 
 Final list of publications is the file `012_exported.xlsx` that is `--outfile` parameter
 in the `012_export_xlsx.sh` script.
 
 
 7) Optionally, you can extended pipeline with ATE step
-- 013_ate_pdf2txt.sh
-- 014_ate_clear_txt.sh
-- 015_ate_generate_datasets.sh
-- 015_ate_generate_partial_datasets.sh
-- 016_ate_get_terms.sh
-- 016_ate_get_terms_partial.sh
-- 016_ate_merge_terms_partial.sh
-- 017_ate_clear_terms.sh
-- 018_ate_saturation.sh              
-
+- `013_ate_pdf2txt.sh` - extract plain text from PDF files
+- `014_ate_clear_txt.sh` - clear extracted texts
+- `015_ate_generate_datasets.sh` - join extracted texts in the sequence of datasets
+- `016_ate_get_terms.sh` - extract terms
+- `017_ate_clear_terms.sh` - remove trash terms (list of trash terms is the file `./data/YOUR_DATA_DIRECTORY/ate_stopwords.csv`)
+- `018_ate_saturation.sh` - does terminological saturation analysis
