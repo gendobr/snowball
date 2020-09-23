@@ -19,7 +19,7 @@ You can find the key as *Primary key* in the *Keys* section.
 You can use one of proxy services listed at 
 [https://www.didsoft.com ](https://www.didsoft.com)
 
-Quick start:
+## Quick start:
 1) get copy ot this repository with
 
    ```
