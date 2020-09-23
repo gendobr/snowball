@@ -7,6 +7,7 @@ To run the package you need
 * python3 
 * [pipenv](https://docs.pipenv.org/)
 * MS Academic Search API key
+* optionally: anonymous proxy to query Google Scholar
 
 ## To get the MS Academic API key
 1) Open [Microsoft Research APIs Portal](https://msr-apis.portal.azure-api.net)
@@ -14,6 +15,9 @@ To run the package you need
 3) Subscribe to *Academic Search API* that is part of *Project Academic Knowledge service*
 You can find the key as *Primary key* in the *Keys* section.
 
+## Anonymous proxy
+You can use one of proxy services listed at 
+[https://www.didsoft.com ](https://www.didsoft.com)
 
 Quick start:
 1) get copy ot this repository with
@@ -55,7 +59,8 @@ Quick start:
    Each seed publication should be
    * be relevant to your search topic
    * have high citation index (however not extremely high)
-   * be up 7-10 years old
+   * be 7-10 years old
+   Reasoning of the above conditions is discussed in *Lecy, J. D., & Beatty, K. E. (2012). Representative literature reviews using constrained snowball sampling and citation network analysis. Available at SSRN 1992601.*
 
    Paste the publication ids in the `./data/YOUR_DATA_DIRECTORY/in-seed.csv` file.
    One id per row
