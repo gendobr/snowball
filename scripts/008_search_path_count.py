@@ -72,7 +72,7 @@ def do_spc(config=None,
         log(("raw network is connected = ", nx.is_connected(citation_net.to_undirected())))
         spc.remove_cycles(citation_net)
         spc.add_source_and_target(citation_net)
-        log("decycled network is connected = ", nx.is_connected(citation_net.to_undirected()))
+        log(("decycled network is connected = ", nx.is_connected(citation_net.to_undirected())))
         nx.write_edgelist(citation_net, file_path_edge_list)
     # =====================================================
 
