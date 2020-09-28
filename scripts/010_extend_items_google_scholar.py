@@ -116,7 +116,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
             except:
                 n_errors += 1
                 ex = sys.exc_info()
-                log(("ERROR", ex[0], ex[1], ex[2]))
+                log(("ERROR", str(ex[0]), str(ex[1]), str(ex[2])))
                 traceback.print_exc(file=sys.stdout)
                 if n_errors > 10:
                     __save_items(file_path_output, items)
