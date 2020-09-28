@@ -105,7 +105,7 @@ def do_spc(config=None,
     # =========================================================================
     # save selected items
     log(('selected items', len(selected_item_ids)))
-    with jsonlines.open(file_path_output, mode='a') as writer:
+    with jsonlines.open(file_path_output, mode='w') as writer:
         for spc_weight, item_id in ordered_items:
             item_id = spc.__paper_of(str(item_id))
             if item_id in items:
