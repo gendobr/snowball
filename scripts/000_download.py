@@ -27,6 +27,8 @@ def snowball(config=None, outfile=None, infile=None):
 
     api = Api(subscription_key, rest_endpoint, include_topics)
 
+    max_entries = conf.get('main', 'max_entries')
+
     data_dir = conf.get('main', 'data_dir')
     log_file_name = '000_download.log'
     log_file_path = os.path.join(data_dir, log_file_name)
@@ -178,7 +180,7 @@ def snowball(config=None, outfile=None, infile=None):
                 for entry_id in known_ids:
                     writer.writerow([entry_id])
 
-            if len(done_ids) >= 20000:
+            if len(done_ids) >= max_entries:
                 break
         cnt += 1
     # /snowball loop
