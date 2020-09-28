@@ -27,11 +27,26 @@ def snowball(config=None,
              inptmfile=None,
              incooccurrencefile=None,
              indictfile=None):
+    t0 = time.time()
+
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '007_restricted_snowball.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
+
+    # =========
+
     rest_endpoint = json.loads(conf.get('msacademic', 'restEndpoint'))
     subscription_key = conf.get('msacademic', 'subscriptionKey')
     include_topics = json.loads(conf.get('msacademic', 'msAcademicIncludeTopicsIds'))
@@ -48,7 +63,7 @@ def snowball(config=None,
     if measure in measure_types:
         difference = measure_types[measure]
     else:
-        print('undefines measure ', measure, 'available types are ', measure_types)
+        log(('undefines measure ', measure, 'available types are ', measure_types))
         exit()
 
     api = Api(subscription_key, rest_endpoint, include_topics)
@@ -63,7 +78,7 @@ def snowball(config=None,
         file_path_initial_queued_ids = infile
     else:
         file_path_initial_queued_ids = file_path_seed_ids
-    print(('infile', file_path_initial_queued_ids))
+    log(('infile', file_path_initial_queued_ids))
 
     queued_ids_set = set()
     queued_ids = queue.Queue()
@@ -108,7 +123,7 @@ def snowball(config=None,
         file_path_dict = indictfile
     else:
         file_path_dict = f'{data_dir}/001_tokenizer_dict.jsonl'
-    print(('indictfile', file_path_dict))
+    log(('indictfile', file_path_dict))
     with jsonlines.open(file_path_dict) as reader:
         word_dictionary = {row[0]: row[1] for row in reader}
     # /dictionary
@@ -120,7 +135,7 @@ def snowball(config=None,
         file_path_cooccurrence = incooccurrencefile
     else:
         file_path_cooccurrence = f'{data_dir}/005_reduced_joint_probabilities.npy'
-    print(('incooccurrencefile', file_path_cooccurrence))
+    log(('incooccurrencefile', file_path_cooccurrence))
     j_prob_reduced = numpy.load(file_path_cooccurrence)
     # /cooccurrence
     # =====================================================
@@ -131,7 +146,7 @@ def snowball(config=None,
         file_path_ptm = inptmfile
     else:
         file_path_ptm = f'{data_dir}/006_ptm_output.npy'
-    print(('inptmfile', file_path_ptm))
+    log(('inptmfile', file_path_ptm))
     ptm_data = numpy.load(file_path_ptm, allow_pickle=True)
     ptm_data = ptm_data.item()
     ptm = tm.Model(data_dir)
@@ -146,12 +161,12 @@ def snowball(config=None,
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/007_restricted_snowball_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
     # =====================================================
 
     # =====================================================
     # load seeds
-    print(('seed_ids', file_path_seed_ids))
+    log(('seed_ids', file_path_seed_ids))
     seed_ids = set()
     with open(file_path_seed_ids, newline='') as csvfile:
         queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
@@ -204,7 +219,7 @@ def snowball(config=None,
         items = api.load_by_ids(next_batch_ids)
         items.extend(api.load_by_rids(next_batch_ids))
         api_call_counter += 2
-        print(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize(), 'items', len(items)))
+        log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize(), 'items', len(items)))
         for item in items:
             entry_id = str(item['id'])
             if entry_id in known_ids:
@@ -295,11 +310,11 @@ def snowball(config=None,
                        "ECC=", item['ecc'],
                        "year", item['year'],
                        "title", item['title'])
-            print(msg)
+            log(msg)
 
         with jsonlines.open(file_path_output, mode='a') as writer:
             for item in json_batch:
-                print(('id', item['id'], 'year', item['year'], 'title', item['title']))
+                log(('id', item['id'], 'year', item['year'], 'title', item['title']))
                 writer.write(item)
 
         if cnt >= save_period:
@@ -335,12 +350,13 @@ def snowball(config=None,
     # /snowball loop
     # =====================================================
 
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
+
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(snowball)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
+

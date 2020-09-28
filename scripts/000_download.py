@@ -15,6 +15,8 @@ import psutil
 
 
 def snowball(config=None, outfile=None, infile=None):
+    t0 = time.time()
+
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
@@ -26,6 +28,16 @@ def snowball(config=None, outfile=None, infile=None):
     api = Api(subscription_key, rest_endpoint, include_topics)
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '000_download.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
 
     # file names
     file_path_queued_ids = f'{data_dir}/000_download_queued_ids.csv'
@@ -37,7 +49,7 @@ def snowball(config=None, outfile=None, infile=None):
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/000_download_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
 
     if infile and infile == 'resume' and os.path.isfile(file_path_queued_ids):
         file_path_initial_queued_ids = file_path_queued_ids
@@ -45,7 +57,7 @@ def snowball(config=None, outfile=None, infile=None):
         file_path_initial_queued_ids = infile
     else:
         file_path_initial_queued_ids = file_path_seed_ids
-    print(('input', file_path_initial_queued_ids))
+    log(('input', file_path_initial_queued_ids))
 
     # =====================================================
     # load initial ids to queue
@@ -109,7 +121,7 @@ def snowball(config=None, outfile=None, infile=None):
         items = api.load_by_ids(next_batch_ids)
         items.extend(api.load_by_rids(next_batch_ids))
         api_call_counter += 2
-        print(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize()))
+        log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize()))
         for item in items:
             entry_id = str(item['id'])
             if entry_id in known_ids:
@@ -136,7 +148,7 @@ def snowball(config=None, outfile=None, infile=None):
             # -------------------------------------------
         with jsonlines.open(file_path_output, mode='a') as writer:
             for item in json_batch:
-                print(('id', item['id'], 'year', item['year'], 'title', item['title']))
+                log(('id', item['id'], 'year', item['year'], 'title', item['title']))
                 writer.write(item)
 
         if cnt >= save_period:
@@ -171,13 +183,12 @@ def snowball(config=None, outfile=None, infile=None):
         cnt += 1
     # /snowball loop
     # =====================================================
-
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss,))  # in bytes
 
 if __name__ == "__main__":
-    t0 = time.time()
+
     fire.Fire(snowball)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

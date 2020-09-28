@@ -10,9 +10,22 @@ import psutil
 
 
 def do_extension(config=None, outfile=None, initems=None):
+    t0 = time.time()
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
+
+    data_dir = conf.get('main', 'data_dir')
+    log_file_name = '009_extend_items.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
 
     rest_endpoint = json.loads(conf.get('msacademic', 'restEndpoint'))
     subscription_key = conf.get('msacademic', 'subscriptionKey')
@@ -143,9 +156,9 @@ def do_extension(config=None, outfile=None, initems=None):
     elif os.path.isfile(file_path_items):
         pass
     else:
-        print('snowball output not found')
+        log('snowball output not found')
         return
-    print(('infile', file_path_items))
+    log(('infile', file_path_items))
     with jsonlines.open(file_path_items) as reader:
         items = {str(row['id']): row for row in reader}
     # /load downloaded items
@@ -157,7 +170,7 @@ def do_extension(config=None, outfile=None, initems=None):
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/009_extend_items_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
     # =====================================================
 
     batch_size = int(conf.get('main', 'batch_size'))
@@ -174,15 +187,15 @@ def do_extension(config=None, outfile=None, initems=None):
     with jsonlines.open(file_path_output, mode='w') as writer:
         for item_id in items:
             item = items[item_id]
-            print(('id', item['id'], 'year', item['year'], 'title', item['title']))
+            log(('id', item['id'], 'year', item['year'], 'title', item['title']))
             writer.write(item)
+
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(do_extension)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

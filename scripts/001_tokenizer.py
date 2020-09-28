@@ -1,16 +1,11 @@
 #!/usr/bin/env python2
 # encoding: UTF-8
-
-# import sys
 import os.path
-from lib.msacademic import Api
 import time
 import fire
 import configparser
 import json
 import jsonlines
-import csv
-import queue
 import lib.nlp as nlp
 import re
 from nltk.stem.porter import PorterStemmer
@@ -19,11 +14,22 @@ import psutil
 
 
 def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
+    t0 = time.time()
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '001_tokenizer.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
 
     # NLP tools:
     custom_tokenizer = nlp.CustomTokenizer()
@@ -43,19 +49,19 @@ def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
         file_path_input = infile
     else:
         file_path_input = f'{data_dir}/000_download_output.jsonl'
-    print(('input', file_path_input))
+    log(('input', file_path_input))
 
     if outfile:
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/001_tokenizer_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
 
     if outdictfile:
         file_path_dict = outdictfile
     else:
         file_path_dict = f'{data_dir}/001_tokenizer_dict.csv'
-    print(('dictfile', file_path_dict))
+    log(('dictfile', file_path_dict))
 
     # =====================================================
     # tokenizer loop
@@ -76,7 +82,7 @@ def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
 
                 cnt = cnt + 1
                 if cnt % 100 == 0:
-                    print((cnt, item['id'], item['year'], item['title'], item['tokens']))
+                    log((cnt, item['id'], item['year'], item['title'], item['tokens']))
 
                 writer.write(item)
 
@@ -86,13 +92,13 @@ def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
     with jsonlines.open(file_path_dict, mode='w') as writer:
         for tk in custom_tokenizer.word_dictionary:
             writer.write([tk, custom_tokenizer.word_dictionary[tk]])
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss,))  # in bytes
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(tokenizer)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
+

@@ -5,41 +5,54 @@ import numpy
 import lib.topicmodel as tm
 import time
 import fire
-import os
+import os, json
 import psutil
 
 
 def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddictfile=None):
+    t0 = time.time()
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '004_stopwords.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
+
+
     # ===============================================================
     # file names
     if infile and os.path.isfile(infile):
         file_path_input = infile
     else:
         file_path_input = f'{data_dir}/003_joint_probabilities.npy'
-    print(('input', file_path_input))
+    log(('input', file_path_input))
 
     if outfile:
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/004_stopwords_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
 
     if dictfile and os.path.isfile(dictfile):
         file_path_dict = dictfile
     else:
         file_path_dict = f'{data_dir}/002_rarewords_reduceddict.jsonl'
-    print(('dictfile', file_path_dict))
+    log(('dictfile', file_path_dict))
 
     if reduceddictfile:
         file_path_reduced_dict = reduceddictfile
     else:
         file_path_reduced_dict = f'{data_dir}/004_stopwords_reduceddict.jsonl'
-    print(('reduceddictfile', file_path_reduced_dict))
+    log(('reduceddictfile', file_path_reduced_dict))
     # /file names
     # ===============================================================
     topic_model = tm.Model(data_dir)
@@ -52,7 +65,7 @@ def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddict
     cooccurrence_probability = numpy.load(file_path_input)
 
     stopwords_dict = topic_model.stopwords(cooccurrence_probability, Hmax)
-    print("stopwords=\n", stopwords_dict)
+    log(("stopwords", stopwords_dict))
     with jsonlines.open(file_path_output, mode='w') as writer:
         for k in stopwords_dict:
             writer.write([k, stopwords_dict[k]])
@@ -62,13 +75,12 @@ def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddict
     with jsonlines.open(file_path_reduced_dict, mode='w') as writer:
         for k in reduced_word_dictionary:
             writer.write([k, reduced_word_dictionary[k]])
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(stopwords)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

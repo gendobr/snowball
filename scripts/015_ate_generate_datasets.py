@@ -3,7 +3,7 @@ import configparser
 import psutil
 import lib.datasetfactory as dsf
 import time
-import os
+import os, json
 
 
 def do_generate_datasets(config=None,
@@ -23,31 +23,49 @@ def do_generate_datasets(config=None,
                     |partial-time-desc|partial-time-asc|partial-time-bidir|partial-random
     :return:
     """
+    t0 = time.time()
+
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
 
+    log_file_name = '015_ate_generate_datasets.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
+
     # =====================================================
-    # place to store extracted texts
+    # place to read extracted texts
     if cleartxtdir:
         clear_txt_dir = cleartxtdir
     else:
         clear_txt_dir = f'{data_dir}/clear_txts'
-    print(('clear_txt_dir', clear_txt_dir))
+    log(('clear_txt_dir', clear_txt_dir))
     # =====================================================
 
     # =====================================================
-    # place to read raw texts
+    # place to store datasets
     if datasetdir:
         out_dataset_dir = datasetdir
     else:
         out_dataset_dir = f'{data_dir}/datasets'
-    print(('raw_txt_dir', out_dataset_dir))
+
+    if not os.path.isdir(out_dataset_dir):
+        log(f'pdf dir {out_dataset_dir} not found. Creating')
+        os.mkdir(out_dataset_dir)
+
+    log(('raw_txt_dir', out_dataset_dir))
     # =====================================================
 
-    print("reading raw TXT from", cleartxtdir, "writing datasets to", out_dataset_dir)
+    log(("reading raw TXT from", cleartxtdir, "writing datasets to", out_dataset_dir))
 
     if strategy == 'citation-desc':
         dsf.factory_citation_desc(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
@@ -77,13 +95,13 @@ def do_generate_datasets(config=None,
         dsf.partial_factory_time_bidir(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
     elif strategy == 'partial-random':
         dsf.partial_factory_random(clear_txt_dir, out_dataset_dir, increment_size=increment_size, metadata=metadatafile)
-#
+
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
+
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(do_generate_datasets)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes

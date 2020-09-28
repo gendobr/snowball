@@ -31,11 +31,26 @@ def do_get_terms(config=None,
     :param trace: show detailed information about execution
     :return:
     """
+    t0 = time.time()
 
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '016_ate_get_terms.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
+
+    if not os.path.isdir(out_dir_terms):
+        log(f'pdf dir {out_dir_terms} not found. Creating')
+        os.mkdir(out_dir_terms)
 
     min_term_words = int(conf.get('ate', 'min_term_words'))
     min_term_length = int(conf.get('ate', 'min_term_length'))
@@ -49,8 +64,9 @@ def do_get_terms(config=None,
     in_dataset_files = sorted([f for f in listdir(in_dir_dataset) if f.lower().endswith(".txt")])
 
     for in_dataset_file in in_dataset_files:
+        t2 = time.time()
         in_dataset = join(in_dir_dataset, in_dataset_file)
-        print(in_dataset)
+        log(in_dataset)
         if not isfile(in_dataset):
             continue
 
@@ -61,17 +77,17 @@ def do_get_terms(config=None,
         doc_txt = re.sub(r'et +al\.', 'et al', doc_txt)
         doc_txt = re.split(r'[\r\n]', doc_txt)
 
-        # print('len(text)=' + str( len(doc_txt) ) )
+        # log('len(text)=' + str( len(doc_txt) ) )
 
         term_extractor = ate.TermExtractor(
             stopwords=stopwords, term_patterns=term_patterns,
             min_term_words=min_term_words, min_term_length=min_term_length
         )
         terms = term_extractor.extract_terms(doc_txt, trace=trace)
-        print('len(terms)=' + str(len(terms)))
+        log('len(terms)=' + str(len(terms)))
         if trace:
-            # print terms[:10]
-            print("Term extraction finished")
+            # log terms[:10]
+            log("Term extraction finished")
 
         c_values = term_extractor.c_values(terms, trace=trace)   # replace this line
 
@@ -79,14 +95,17 @@ def do_get_terms(config=None,
         with jsonlines.open(out_terms_file, mode='w') as writer:
             for cv in c_values:
                 writer.write(cv)
+        t1 = time.time()
+        log(("time", t1 - t2,))
+
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(do_get_terms)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
+
 

@@ -1,6 +1,6 @@
 # import sys
 import lib.thd as thd
-import os
+import os, json
 import jsonlines
 from nltk.stem.porter import *
 import pandas as pd
@@ -24,19 +24,28 @@ def do_ate_saturation(
     :param out_thd: output CSV file containing terms
     :return:
     """
-
+    t0 = time.time()
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
-    # data_dir = conf.get('main', 'data_dir')
-    # trace = (int(trace) == 1)
+    data_dir = conf.get('main', 'data_dir')
+    log_file_name = '018_ate_saturation.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
 
     term_files = sorted([join(in_dir, f) for f in listdir(in_dir) if isfile(join(in_dir, f)) and f.lower().endswith(".txt")])
-    print(('term_files', term_files,))
+    log(('term_files', term_files,))
     report = []
 
     for i in range(0, len(term_files) - 1):
-        print("------starting new iteration--------")
+        log("------starting new iteration--------")
         with jsonlines.open(term_files[i]) as reader:
             terms_1 = [row for row in reader]
         df_T1 = pd.DataFrame(data=terms_1, columns=['term', 'cvalue']).set_index('term')
@@ -55,19 +64,18 @@ def do_ate_saturation(
                 thd=val_thd
             )
         report.append(r)
-        print(r)
+        log(r)
 
     with jsonlines.open(out_thd, mode='w') as writer:
         for r in report:
             writer.write(r)
 
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
+
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(do_ate_saturation)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
-

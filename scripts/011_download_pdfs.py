@@ -4,18 +4,31 @@ import time
 import fire
 import configparser
 import jsonlines
+import json
 import urllib.request
 import re
 import psutil
 
 
 def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
+
+    t0 = time.time()
+
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
 
+    log_file_name = '011_download_pdfs.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.close()
     # =====================================================
     # place to store extended item
     if outfile:
@@ -43,14 +56,14 @@ def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
     # /load downloaded items
     # =====================================================
 
-    pdf_dir = f'{data_dir}/pdfs'
+    pdf_dir = os.path.join(data_dir, 'pdfs')
     if pdfdir and os.path.isdir(pdfdir):
         pdf_dir = pdfdir
-    elif os.path.isfile(pdf_dir):
+    elif os.path.isdir(pdf_dir):
         pass
     else:
-        print(f'pdf dir {pdf_dir} not found')
-        return
+        print(f'pdf dir {pdf_dir} not found. Creating')
+        os.mkdir(pdf_dir)
     print(('pdf_dir', pdf_dir))
 
     pdf_url_pattern = r'pdf$'
@@ -115,12 +128,12 @@ def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
             print(('id', item['id'], 'pdf_present', items[item_id]['pdf_present'], 'pdf_file_name', item['pdf_file_name'], 'title', item['title']))
             writer.write(item)
 
-
-if __name__ == "__main__":
-    t0 = time.time()
-    fire.Fire(do_extension)
     t1 = time.time()
     print("finished")
     print(("time", t1 - t0,))
     process = psutil.Process(os.getpid())
     print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
+
+
+if __name__ == "__main__":
+    fire.Fire(do_extension)

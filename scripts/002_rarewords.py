@@ -1,20 +1,29 @@
-import sys
-
 import configparser
 import time
 import fire
 import lib.topicmodel as tm
-import os
+import os, json
 import psutil
 import jsonlines
 
 
 def rare_words(config=None, outfile=None, infile=None, dictfile=None, reduceddictfile=None):
+    t0 = time.time()
     # read configuration file
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
+    log_file_name = '002_rarewords.log'
+    log_file_path = os.path.join(data_dir, log_file_name)
+
+    def log(msg):
+        s = json.dumps(msg)
+        print(s)
+        f = open(log_file_path, "a")
+        f.write(s)
+        f.write("\n")
+        f.close()
 
     alpha = conf.getfloat('main', 'alpha')
 
@@ -24,25 +33,25 @@ def rare_words(config=None, outfile=None, infile=None, dictfile=None, reduceddic
         file_path_input = infile
     else:
         file_path_input = f'{data_dir}/001_tokenizer_output.jsonl'
-    print(('input', file_path_input))
+    log(('input', file_path_input))
 
     if outfile:
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/002_rarewords_output.jsonl'
-    print(('output', file_path_output))
+    log(('output', file_path_output))
 
     if dictfile and os.path.isfile(dictfile):
         file_path_dict = dictfile
     else:
         file_path_dict = f'{data_dir}/001_tokenizer_dict.jsonl'
-    print(('dictfile', file_path_dict))
+    log(('dictfile', file_path_dict))
 
     if reduceddictfile:
         file_path_reduced_dict = reduceddictfile
     else:
         file_path_reduced_dict = f'{data_dir}/002_rarewords_reduceddict.jsonl'
-    print(('reduceddictfile', file_path_reduced_dict))
+    log(('reduceddictfile', file_path_reduced_dict))
     # /file names
     # ===============================================================
 
@@ -71,14 +80,13 @@ def rare_words(config=None, outfile=None, infile=None, dictfile=None, reduceddic
         for k in reduced_word_dictionary:
             writer.write([k, reduced_word_dictionary[k]])
 
-    print("Dictionary size", len(word_dictionary), " => ", len(reduced_word_dictionary))
+    log(("Dictionary size", len(word_dictionary), " => ", len(reduced_word_dictionary)))
+    t1 = time.time()
+    log("finished")
+    log(("time", t1 - t0,))
+    process = psutil.Process(os.getpid())
+    log(('used RAM(bytes)=', process.memory_info().rss))  # in bytes
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     fire.Fire(rare_words)
-    t1 = time.time()
-    print("finished")
-    print(("time", t1 - t0,))
-    process = psutil.Process(os.getpid())
-    print('used RAM(bytes)=', process.memory_info().rss)  # in bytes
