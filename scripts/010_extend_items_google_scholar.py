@@ -61,6 +61,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     if len(proxy) > 0:
         scholarly.scholarly.use_proxy(http=proxy)
 
+    scholarly.scholarly.set_retries(1)
+
     n_errors = 0
     for item_id in items:
 
