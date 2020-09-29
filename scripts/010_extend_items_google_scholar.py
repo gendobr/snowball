@@ -112,7 +112,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                 )
                 log(items[item_id]['google_scholar'])
                 n_errors = 0
-                time.sleep(18+5*random.random())
+                time.sleep((30-5)*random.random()+5) #from 5 to 30 seconds
             except:
                 n_errors += 1
                 ex = sys.exc_info()
