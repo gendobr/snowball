@@ -16,7 +16,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
-    save_period = conf.get('main', 'save_period')
+    save_period = int(conf.get('main', 'save_period'))
 
     data_dir = conf.get('main', 'data_dir')
     log_file_name = '010_extend_items_google_scholar.log'
