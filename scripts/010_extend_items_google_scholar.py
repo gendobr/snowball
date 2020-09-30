@@ -69,7 +69,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     cnt = 0
     for item_id in items:
         cnt += 1
-        log(('extending', 'item_id', item_id))
+        log(('extending', 'cnt', cnt,'item_id', item_id))
 
         if 'google_scholar' in items[item_id]:
             log(('skip', 'item_id', item_id, ))
