@@ -132,6 +132,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
         if cnt % save_period == 0:
             __save_items(file_path_output, items)
 
+    __save_items(file_path_output, items)
+    
     for item_id in items:
         item = items[item_id]
         log(('id', item['id'], 'year', item['year'], 'title', item['title']))
