@@ -16,6 +16,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
+    save_period = conf.get('main', 'save_period')
+
     data_dir = conf.get('main', 'data_dir')
     log_file_name = '010_extend_items_google_scholar.log'
     log_file_path = os.path.join(data_dir, log_file_name)
@@ -64,8 +66,9 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     scholarly.scholarly.set_retries(1)
 
     n_errors = 0
+    cnt = 0
     for item_id in items:
-
+        cnt += 1
         log(('extending', 'item_id', item_id))
 
         if 'google_scholar' in items[item_id]:
@@ -126,7 +129,9 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
         else:
             log(('ERROR', 'message', 'google_search_string is empty'))
 
-    __save_items(file_path_output, items)
+        if cnt % save_period == 0:
+            __save_items(file_path_output, items)
+
     for item_id in items:
         item = items[item_id]
         log(('id', item['id'], 'year', item['year'], 'title', item['title']))
