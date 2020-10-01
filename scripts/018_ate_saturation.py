@@ -44,6 +44,7 @@ def do_ate_saturation(
     log(('term_files', term_files,))
     report = []
 
+    val_thd_previous = None
     for i in range(0, len(term_files) - 1):
         log("------starting new iteration--------")
         with jsonlines.open(term_files[i]) as reader:
@@ -57,18 +58,30 @@ def do_ate_saturation(
         val_eps, val_thd, val_thdr = thd.thd(df_T1, df_T2)
 
         r = dict(
-                file1=term_files[i],
-                file2=term_files[i + 1],
+                dataset_pair=(i+1, i),
                 eps=val_eps,
-                thdr=val_thdr,
-                thd=val_thd
-            )
+                thd=float(val_thd),
+                NET=len(terms_2),
+                NRT=int(df_T2[df_T2['cvalue'] > val_eps].size),
+                thdr=float(val_thdr),
+        )
+        r['PRT'] = r['NRT']/r['NET']
+        if val_thd_previous is not None:
+            r['ThdV'] = val_thd - val_thd_previous
+        else:
+            r['ThdV'] = None
+
+        r['file1'] = term_files[i]
+        r['file2'] = term_files[i+1]
         report.append(r)
         log(r)
+        val_thd_previous = val_thd
 
-    with jsonlines.open(out_thd, mode='w') as writer:
-        for r in report:
-            writer.write(r)
+    # with jsonlines.open(out_thd, mode='w') as writer:
+    #    for r in report:
+    #        writer.write(r)
+    df_report = pd.DataFrame(report)
+    df_report.to_csv(out_thd)
 
     t1 = time.time()
     log("finished")
