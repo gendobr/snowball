@@ -27,7 +27,7 @@ def snowball(config=None, outfile=None, infile=None):
 
     api = Api(subscription_key, rest_endpoint, include_topics)
 
-    max_entries = conf.get('main', 'max_entries')
+    max_entries = int(conf.get('main', 'max_entries'))
 
     data_dir = conf.get('main', 'data_dir')
     log_file_name = '000_download.log'
