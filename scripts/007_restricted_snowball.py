@@ -73,6 +73,7 @@ def snowball(config=None,
     # load initial ids to queue
     file_path_queued_ids = f'{data_dir}/007_restricted_snowball_queued_ids.csv'  # queued items
     file_path_seed_ids = f'{data_dir}/in-seed.csv'  # seed item ids
+    log(('infile', infile))
     if infile and infile == 'resume' and os.path.isfile(file_path_queued_ids):
         file_path_initial_queued_ids = file_path_queued_ids
     elif infile and os.path.isfile(infile):
@@ -83,7 +84,7 @@ def snowball(config=None,
         if os.path.isfile(file_path_queued_ids):
             os.remove(file_path_queued_ids)
         file_path_initial_queued_ids = file_path_seed_ids
-    log(('infile', file_path_initial_queued_ids))
+    log(('file_path_initial_queued_ids', file_path_initial_queued_ids))
 
     queued_ids_set = set()
     queued_ids = queue.Queue()
@@ -107,7 +108,6 @@ def snowball(config=None,
                 known_ids.add(str(row[0]))
     elif  os.path.isfile(file_path_known_ids):
         os.remove(file_path_known_ids)
-
     # /load known ids
     # =====================================================
 
@@ -120,9 +120,9 @@ def snowball(config=None,
             queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
             for row in queue_reader:
                 item_id = str(row[0])
-                queued_ids_set.add(item_id)
+                # queued_ids_set.add(item_id) ????
                 done_ids.add(item_id)
-    elif  os.path.isfile(file_path_known_ids):
+    elif  os.path.isfile(file_path_done_ids):
         os.remove(file_path_done_ids)
     # /load done ids
     # =====================================================
@@ -193,8 +193,9 @@ def snowball(config=None,
         with jsonlines.open(file_path_output) as reader:
             for item in reader:
                 n_accepted_ids += 1
-                if item['id'] in seed_ids:
-                    seed_items[str(item['id'])] = item
+                iten_id = str(item['id'])
+                if iten_id in seed_ids:
+                    seed_items[iten_id] = item
     log(('seed_ids', [x for x in seed_items]))
     # =====================================================
 
@@ -218,8 +219,9 @@ def snowball(config=None,
     while True:
         json_batch = []
         next_batch_ids = []
-        if len(seed_ids) > len(seed_items):
+        if len(seed_items) == 0:
             next_batch_ids.extend([x for x in seed_ids if x not in seed_items])
+            log(('seed_ids=>next_batch_ids', next_batch_ids))
         else:
             try:
                 while len(next_batch_ids) < batch_size:
@@ -228,6 +230,7 @@ def snowball(config=None,
                         next_batch_ids.append(next_id)
             except:
                 pass
+            log(('next_batch_ids', next_batch_ids))
 
         if len(next_batch_ids) == 0:
             break
@@ -238,9 +241,11 @@ def snowball(config=None,
         items.extend(api.load_by_rids(next_batch_ids))
         api_call_counter += 2
         log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize(), 'items', len(items)))
+        n_known_items = 0
         for item in items:
             entry_id = str(item['id'])
             if entry_id in known_ids:
+                n_known_items += 1
                 continue
 
             """
@@ -330,12 +335,14 @@ def snowball(config=None,
                        "title", item['title'])
             log(msg)
 
+        
+        log(('n_known_items', n_known_items))
         with jsonlines.open(file_path_output, mode='a') as writer:
             for item in json_batch:
                 log(('id', item['id'], 'year', item['year'], 'title', item['title']))
                 writer.write(item)
 
-        if cnt >= save_period:
+        if cnt >= save_period or n_known_items==len(items):
             """
                 save current state
             """
@@ -352,6 +359,7 @@ def snowball(config=None,
                         queued_ids.put(entry_id)
                 except:
                     pass
+
             with open(file_path_done_ids, 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter="\t", quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 for entry_id in done_ids:
@@ -362,8 +370,9 @@ def snowball(config=None,
                 for entry_id in known_ids:
                     writer.writerow([entry_id])
 
-            if len(done_ids) >= 20000:
+            if len(done_ids) >= 20000 or n_known_items == len(items):
                 break
+
         cnt += 1
     # /snowball loop
     # =====================================================
