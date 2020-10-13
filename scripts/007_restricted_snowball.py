@@ -3,6 +3,7 @@
 
 # import sys
 import os.path
+import os
 from lib.msacademic import Api
 import time
 import fire
@@ -75,8 +76,12 @@ def snowball(config=None,
     if infile and infile == 'resume' and os.path.isfile(file_path_queued_ids):
         file_path_initial_queued_ids = file_path_queued_ids
     elif infile and os.path.isfile(infile):
+        if os.path.isfile(file_path_queued_ids):
+            os.remove(file_path_queued_ids)
         file_path_initial_queued_ids = infile
     else:
+        if os.path.isfile(file_path_queued_ids):
+            os.remove(file_path_queued_ids)
         file_path_initial_queued_ids = file_path_seed_ids
     log(('infile', file_path_initial_queued_ids))
 
@@ -95,11 +100,14 @@ def snowball(config=None,
     # load known ids
     file_path_known_ids = f'{data_dir}/007_restricted_snowball_known_ids.csv'  # items that were downloaded
     known_ids = set()
-    if os.path.isfile(file_path_known_ids):
+    if infile and infile == 'resume' and os.path.isfile(file_path_known_ids):
         with open(file_path_known_ids, newline='') as csvfile:
             queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
             for row in queue_reader:
                 known_ids.add(str(row[0]))
+    elif  os.path.isfile(file_path_known_ids):
+        os.remove(file_path_known_ids)
+
     # /load known ids
     # =====================================================
 
@@ -107,13 +115,15 @@ def snowball(config=None,
     # load done ids
     file_path_done_ids = f'{data_dir}/007_restricted_snowball_done_ids.csv'      # items that were in the queue
     done_ids = set()
-    if os.path.isfile(file_path_done_ids):
+    if infile and infile == 'resume' and os.path.isfile(file_path_done_ids):
         with open(file_path_done_ids, newline='') as csvfile:
             queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
             for row in queue_reader:
                 item_id = str(row[0])
                 queued_ids_set.add(item_id)
                 done_ids.add(item_id)
+    elif  os.path.isfile(file_path_known_ids):
+        os.remove(file_path_done_ids)
     # /load done ids
     # =====================================================
 
@@ -161,12 +171,16 @@ def snowball(config=None,
         file_path_output = outfile
     else:
         file_path_output = f'{data_dir}/007_restricted_snowball_output.jsonl'
+
+    if not ( infile and infile == 'resume' ) and  os.path.isfile(file_path_output):
+        os.remove(file_path_output)
+
     log(('output', file_path_output))
     # =====================================================
 
     # =====================================================
     # load seeds
-    log(('seed_ids', file_path_seed_ids))
+    log(('seed_ids_file', file_path_seed_ids))
     seed_ids = set()
     with open(file_path_seed_ids, newline='') as csvfile:
         queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
@@ -181,6 +195,7 @@ def snowball(config=None,
                 n_accepted_ids += 1
                 if item['id'] in seed_ids:
                     seed_items[str(item['id'])] = item
+    log(('seed_ids', [x for x in seed_items]))
     # =====================================================
 
     # =====================================================
@@ -203,13 +218,16 @@ def snowball(config=None,
     while True:
         json_batch = []
         next_batch_ids = []
-        try:
-            while len(next_batch_ids) < batch_size:
-                next_id = queued_ids.get_nowait()
-                if next_id not in done_ids:
-                    next_batch_ids.append(next_id)
-        except:
-            pass
+        if len(seed_ids) > len(seed_items):
+            next_batch_ids.extend([x for x in seed_ids if x not in seed_items])
+        else:
+            try:
+                while len(next_batch_ids) < batch_size:
+                    next_id = queued_ids.get_nowait()
+                    if next_id not in done_ids:
+                        next_batch_ids.append(next_id)
+            except:
+                pass
 
         if len(next_batch_ids) == 0:
             break
