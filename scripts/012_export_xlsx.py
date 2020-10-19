@@ -105,9 +105,10 @@ def do_export(config=None, outfile=None, initems=None):
 
         #         'DOI Link',                 # I
         doi_link = None
-        for u in item["urls"]:
-            if 'doi.org/' in u["U"]:
-                doi_link = u["U"]
+        if item["urls"]:
+            for u in item["urls"]:
+                if 'doi.org/' in u["U"]:
+                    doi_link = u["U"]
         flat_item.append(doi_link)
 
         #         'MSF ID',                   # J This is the identifier of the doc in the MS Research repository.
