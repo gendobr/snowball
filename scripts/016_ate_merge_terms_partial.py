@@ -77,7 +77,7 @@ def do_clear_terms(config=None,
         df_cumulative.columns = ['cvalue']
         df_cumulative.sort_values(by='cvalue', ascending=False, inplace=True)
         log(('partial_term_file', partial_term_file))
-        log(df_cumulative.head())
+        log(list(df_cumulative.head()))
 
         # write next term list to file
         file_counter += 1
