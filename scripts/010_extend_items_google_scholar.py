@@ -6,6 +6,7 @@ import configparser
 import jsonlines
 import psutil
 import scholarly
+from scholarly import ProxyGenerator
 import sys, traceback, random, json
 
 
@@ -61,7 +62,11 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     # ! maybe proxy is needed
     proxy = conf.get('google_scholar', 'proxy')
     if len(proxy) > 0:
-        scholarly.scholarly.use_proxy(http=proxy)
+        pg = ProxyGenerator()
+        http = proxy if 'http://' in proxy else None
+        https = proxy if 'https://' in proxy else None
+        pg.SingleProxy(http=http, https=https)
+        scholarly.scholarly.use_proxy(pg)
 
     scholarly.scholarly.set_retries(1)
 
@@ -133,7 +138,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
             __save_items(file_path_output, items)
 
     __save_items(file_path_output, items)
-    
+
     for item_id in items:
         item = items[item_id]
         log(('id', item['id'], 'year', item['year'], 'title', item['title']))
