@@ -1,12 +1,13 @@
 #!/bin/sh
+ddr=../data/$1
 pipenv run python \
-   011_download_pdfs.py --config=../data/GAN/config.ini \
-                   --outfile=../data/GAN/011_download_pdfs.jsonl \
-                   --initems=../data/GAN/010_extend_items_google_scholar.jsonl \
-                   --pdfdir=../data/GAN/pdfs
+   011_download_pdfs.py --config=$ddr/config.ini \
+                   --outfile=$ddr/011_download_pdfs.jsonl \
+                   --initems=$ddr/010_extend_items_google_scholar.jsonl \
+                   --pdfdir=$ddr/pdfs
 
 #pipenv run python \
-#   011_download_pdfs.py --config=../data/GAN/config.ini \
-#                   --outfile=../data/GAN/011_download_pdfs.jsonl \
+#   011_download_pdfs.py --config=$ddr/config.ini \
+#                   --outfile=$ddr/011_download_pdfs.jsonl \
 #                   --initems=resume \
-#                   --pdfdir=../data/GAN/pdfs
+#                   --pdfdir=$ddr/pdfs

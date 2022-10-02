@@ -182,10 +182,14 @@ def snowball(config=None,
     # load seeds
     log(('seed_ids_file', file_path_seed_ids))
     seed_ids = set()
+    if not os.path.isfile(file_path_seed_ids):
+        log(('error', 'message', 'seed not found', 'file_path_seed_ids', file_path_seed_ids))
+        exit()
     with open(file_path_seed_ids, newline='') as csvfile:
         queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
         for row in queue_reader:
             seed_ids.add(str(row[0]))
+    log(('seed_ids', [x for x in seed_ids]))
 
     n_accepted_ids = 0
     seed_items = dict()
@@ -196,7 +200,7 @@ def snowball(config=None,
                 iten_id = str(item['id'])
                 if iten_id in seed_ids:
                     seed_items[iten_id] = item
-    log(('seed_ids', [x for x in seed_items]))
+    log(('seed_items', [x for x in seed_items]))
     # =====================================================
 
     # =====================================================
@@ -237,8 +241,8 @@ def snowball(config=None,
 
         done_ids.update(next_batch_ids)
 
-        items = api.load_by_ids(next_batch_ids)
-        items.extend(api.load_by_rids(next_batch_ids))
+        items = api.load_by_ids(next_batch_ids, verbose=False)
+        items.extend(api.load_by_rids(next_batch_ids, verbose=False))
         api_call_counter += 2
         log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize(), 'items', len(items)))
         n_known_items = 0
@@ -274,10 +278,13 @@ def snowball(config=None,
             if entry_id in seed_ids:
                 item['distance_to_seed'] = 0
             else:
-                item['distance_to_seed'] = min([
+                print()
+                all_distances = [
                     difference(item['ptm'], seed_items[seed_item_id]['ptm'])
                     for seed_item_id in seed_items
-                ])
+                ]
+                print(all_distances)
+                item['distance_to_seed'] = min(all_distances)
             # /distance_to_seed
             # -----------------------------------------------------------------
 

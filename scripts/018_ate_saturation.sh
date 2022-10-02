@@ -1,6 +1,7 @@
 #!/bin/sh
+ddr=../data/$1
 pipenv run python \
    018_ate_saturation.py \
-       --config=../data/GAN/config.ini \
-       --in_dir=../data/GAN/terms_clear \
-       --out_thd=../data/GAN/018_thd.csv
+       --config=$ddr/config.ini \
+       --in_dir=$ddr/terms_clear \
+       --out_thd=$ddr/018_thd.csv

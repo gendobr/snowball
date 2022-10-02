@@ -60,19 +60,31 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     # place here Google Scholar calls to extract citation index
     # ! maybe proxy is needed
     proxy = conf.get('google_scholar', 'proxy')
-    if len(proxy) > 0:
-        scholarly.scholarly.use_proxy(http=proxy)
+    if proxy and len(proxy) > 0:
+        pg = scholarly.ProxyGenerator()
+        pg.SingleProxy(http = proxy)
+        scholarly.scholarly.use_proxy(pg)
+    else:
+        pg = scholarly.ProxyGenerator()
+        pg.FreeProxies()
+        scholarly.scholarly.use_proxy(pg)
+
 
     scholarly.scholarly.set_retries(1)
 
     n_errors = 0
     cnt = 0
+    random.seed()
     for item_id in items:
         cnt += 1
         log(('extending', 'cnt', cnt,'item_id', item_id))
 
         if 'google_scholar' in items[item_id]:
             log(('skip', 'item_id', item_id, ))
+            continue
+
+        if random.random() > 0.7:
+            log(('dropout', 'item_id', item_id, ))
             continue
 
         google_search_string = list()
@@ -103,6 +115,21 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
             try:
                 search_query = scholarly.scholarly.search_pubs(google_search_string)
                 pub = next(search_query)
+            except:
+                n_errors += 1
+                ex = sys.exc_info()
+                log(("ERROR", str(ex[0]), str(ex[1]), str(ex[2])))
+                traceback.print_exc(file=sys.stdout)
+                pub = None
+                if n_errors > 10:
+                    __save_items(file_path_output, items)
+                    break
+
+            if pub:
+                try:
+                    bibtex = pub.bibtex
+                except:
+                    bibtex = ""
                 items[item_id]['google_scholar'] = dict(
                     abstract=pub.bib['abstract'] if 'abstract' in pub.bib else '',
                     author=pub.bib['author'] if 'author' in pub.bib else '',
@@ -113,19 +140,11 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                     url=pub.bib['url'] if 'url' in pub.bib else '',
                     venue=pub.bib['venue'] if 'venue' in pub.bib else '',
                     year=pub.bib['year'] if 'year' in pub.bib else '',
-                    bibtex=pub.bibtex,
+                    bibtex=bibtex,
                 )
                 log(items[item_id]['google_scholar'])
                 n_errors = 0
-                time.sleep((30-5)*random.random()+5) #from 5 to 30 seconds
-            except:
-                n_errors += 1
-                ex = sys.exc_info()
-                log(("ERROR", str(ex[0]), str(ex[1]), str(ex[2])))
-                traceback.print_exc(file=sys.stdout)
-                if n_errors > 10:
-                    __save_items(file_path_output, items)
-                    break
+            time.sleep((30-5)*random.random()+5) #from 5 to 30 seconds
         else:
             log(('ERROR', 'message', 'google_search_string is empty'))
 
@@ -146,6 +165,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
 
 
 def __save_items(file_path_output, items):
+    print(("__save_items", 'file_path_output', file_path_output))
     with jsonlines.open(file_path_output, mode='w') as writer:
         for item_id in items:
             item = items[item_id]
