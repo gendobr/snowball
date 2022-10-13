@@ -14,8 +14,7 @@ def rare_words(config=None, outfile=None, infile=None, dictfile=None, reduceddic
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '002_rarewords.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('002_rarewords', 'log_file_name'))
 
     def log(msg):
         s = json.dumps(msg)
@@ -25,7 +24,7 @@ def rare_words(config=None, outfile=None, infile=None, dictfile=None, reduceddic
         f.write("\n")
         f.close()
 
-    alpha = conf.getfloat('main', 'alpha')
+    alpha = conf.getfloat('002_rarewords', 'alpha')
 
     # ===============================================================
     # file names

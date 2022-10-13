@@ -19,7 +19,7 @@ def do_pdf2txt(config=None, txtdir=None, pdfdir=None):
 
     data_dir = conf.get('main', 'data_dir')
 
-    log_file_name = '013_ate_pdf2txt.log'
+    log_file_name = '012_ate_pdf2txt.log'
     log_file_path = os.path.join(data_dir, log_file_name)
 
     def log(msg):

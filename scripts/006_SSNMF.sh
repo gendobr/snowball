@@ -1,6 +1,6 @@
 #!/bin/sh
-ddr=../data/$1
-pipenv run python \
+ddr=../data/openalex-test
+poetry run python \
    006_SSNMF.py --config=$ddr/config.ini \
                    --outfile=$ddr/006_ssnmf_output.npy \
                    --infile=$ddr/005_reduced_joint_probabilities.npy \

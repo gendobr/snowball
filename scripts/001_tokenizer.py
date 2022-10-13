@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # encoding: UTF-8
 import os.path
 import time
@@ -20,8 +19,9 @@ def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '001_tokenizer.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('001_tokenizer', 'log_file_name'))
+
+    min_word_length = int(conf.get('001_tokenizer', 'min_word_length'))
 
     def log(msg):
         s = json.dumps(msg)
@@ -72,12 +72,15 @@ def tokenizer(config=None, outfile=None, infile=None, outdictfile=None):
 
                 item['tokens'] = []
                 if "topics" in item and item["topics"]:
-                    item['tokens'].extend([it['name'] for it in item["topics"]])
+                    item['tokens'].extend([it['name'] for it in item["topics"] if len(it['name']) >= min_word_length])
 
                 item['tokens'].extend(
-                    custom_tokenizer.extend_tokens(
-                        custom_tokenizer.get_tokens(str(item['title']) + ". " + str(item['abstract']))
-                    )
+                    [
+                        x for x in custom_tokenizer.extend_tokens(
+                            custom_tokenizer.get_tokens(str(item['title']) + ". " + str(item['abstract']))
+                        )
+                        if len(x) >= min_word_length
+                    ]
                 )
 
                 cnt = cnt + 1

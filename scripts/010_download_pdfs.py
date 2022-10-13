@@ -10,6 +10,28 @@ import re
 import psutil
 
 
+
+def get_optional(
+    path,
+    tree,
+    default_value=None,
+):
+    """
+    Extract branch from tree using path
+    """
+    if tree is None:
+        return default_value
+    res = tree
+    for p in path:
+        try:
+            res = res[p]
+        except (TypeError, IndexError, KeyError):
+            return default_value
+    if res is None:
+        return default_value
+    return res
+
+
 def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
 
     t0 = time.time()
@@ -20,8 +42,7 @@ def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
 
     data_dir = conf.get('main', 'data_dir')
 
-    log_file_name = '011_download_pdfs.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('010_download_pdfs', 'log_file_name'))
 
     def log(msg):
         s = json.dumps(msg)
@@ -79,12 +100,12 @@ def do_extension(config=None, outfile=None, initems=None, pdfdir=None):
             pdf_url = items[item_id]["google_scholar"]["eprint"]
             if not re.search(pdf_url_pattern,pdf_url):
                 pdf_url = None
-        if pdf_url is None and 'urls' in items[item_id]:
-            for u in items[item_id]['urls']:
-                if pdf_url is None and "Ty" in u and u["Ty"] == 3:
-                    pdf_url = u["U"]
-                    if not re.search(pdf_url_pattern, pdf_url):
-                        pdf_url = None
+
+        
+        if pdf_url is None and get_optional(["raw", "open_access", "is_oa"] ,items[item_id], False):
+            openalex_pdf = str(get_optional(["raw", "open_access", "oa_url"] ,items[item_id], ''))
+            if openalex_pdf.lower().endswith('.pdf'):
+                pdf_url = openalex_pdf
 
         # compose file name
         # > <Year>+”-“+<Type>+”-“+<Volume>+”(“+<Issue>+”)-(“+<Pages>+”)-“+(substring of <DOI> after ‘/’; all the <DOI> string if there is no ‘/’ in it)

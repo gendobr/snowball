@@ -54,8 +54,8 @@ def do_export(config=None, outfile=None, initems=None):
         'Issue No',                 # F
         'Pages',                    # G
         'DOI',                      # H
-        'DOI Link',                 # I
-        'MSF ID',                   # J This is the identifier of the doc in the MS Research repository.
+        #'DOI Link',                 # I
+        'ID',                   # J This is the identifier of the doc in the MS Research repository.
         'Paper Title',              # K
         'Authors',                  # L. This is the semicolon-separated list of the authors of the document.
         'Affiliations',             # M. This is the list of the affiliations of the document authors, semicolon
@@ -101,21 +101,21 @@ def do_export(config=None, outfile=None, initems=None):
         flat_item.append(f"""{item["page_first"]}-{item["page_last"]}""")
 
         #         'DOI',                      # H
-        flat_item.append(item["DOI"])
+        flat_item.append(item["doi"])
 
-        #         'DOI Link',                 # I
-        doi_link = None
-        if item["urls"]:
-            for u in item["urls"]:
-                if 'doi.org/' in u["U"]:
-                    doi_link = u["U"]
-        flat_item.append(doi_link)
+        # #         'DOI Link',                 # I
+        # doi_link = None
+        # if item["urls"]:
+        #     for u in item["urls"]:
+        #         if 'doi.org/' in u["U"]:
+        #             doi_link = u["U"]
+        # flat_item.append(doi_link)
 
         #         'MSF ID',                   # J This is the identifier of the doc in the MS Research repository.
         flat_item.append(item["id"])
 
         #         'Paper Title',              # K
-        flat_item.append(item["title_raw"])
+        flat_item.append(item["title"])
 
         #         'Authors',                  # L. This is the semicolon-separated list of the authors of the document.
         authors = list()
@@ -136,7 +136,10 @@ def do_export(config=None, outfile=None, initems=None):
         abstract = item["abstract"]
         if len(abstract) < 5:
             if "google_scholar" in item:
-                abstract = item["google_scholar"]["abstract"]
+                try:
+                    abstract = item["google_scholar"][0]["abstract"]
+                except:
+                    pass
         flat_item.append(abstract)
 
         #         'Category1',                # P
@@ -166,7 +169,10 @@ def do_export(config=None, outfile=None, initems=None):
         #         'Citations (GS)',           # U The citation count for the document acquired from Google Scholar
         citations = 0
         if "google_scholar" in item:
-            citations = int(item["google_scholar"]["cites"])
+            try:
+                citations = int(item["google_scholar"][0]["cites"])
+            except:
+                pass
         flat_item.append(citations)
 
         # 'Citations per year (GS)', # V This is the citation frequency we need for document ordering. The
@@ -197,170 +203,166 @@ def do_export(config=None, outfile=None, initems=None):
 
 
 def get_bibtex(item):
-    if "google_scholar" in item:
+    try:
         return item["google_scholar"]["bibtex"]
+    except:
+        pass
     op = "{"
     cp = "}"
     bibtex = list()
-    bibtex.append(f"""@{item["bibtex_type"]}{op}ms{item["id"]}""")
+    # bibtex.append(f"""@{item["bibtex_type"]}{op}ms{item["id"]}""")
+    bibtex.append(f"""@{op}openalex{item["id"]}""")
 
     authors = list()
     for au in item["authors"]:
         authors.append(au['name'])
     authors = ' and '.join(authors)
 
-    if item["bibtex_type"] == 'article':
+    if item["publication_type"] == 'journal-article':
         '''
         Статья из журнала.
         Необходимые поля: +author, +title, +journal, +year
         Дополнительные поля: volume, number, pages, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
-        bibtex.append(f"""journal = {op}{item["bibtex_venue_name"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
+        bibtex.append(f"""journal = {op}{item["venue_full_name"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
         if item["volume"]: bibtex.append(f"""volume = {op}{item["volume"]}{cp}""")
         if item["issue"]: bibtex.append(f"""number = {op}{item["issue"]}{cp}""")
         if item["page_first"]: bibtex.append(f"""pages = {op}{item["page_first"]}-{item["page_last"]}{cp}""")
 
-    elif item["bibtex_type"] == 'book':
+    elif item["publication_type"] in (
+        "book", 
+        "monograph", 
+        "edited-book",
+        "reference-book", 
+        ):
         '''
         Определённое издание книги.
         Необходимые поля: +author/editor, +title, +publisher, +year
         Дополнительные поля: +volume, series, address, edition, month, note, key, +pages
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""publisher = {op}{item["publisher"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
         if item["page_first"]: bibtex.append(f"""pages = {op}{item["page_first"]}-{item["page_last"]}{cp}""")
         if item["volume"]: bibtex.append(f"""volume = {op}{item["volume"]}{cp}""")
 
-    elif item["bibtex_type"] == 'booklet':
+    elif item["publication_type"] == 'booklet':
         '''
-        Печатная работа, которая не содержит имя издателя или организатора (например, самиздат).
+        Печатная работа, которая не содержит имя издателя или организатора 
+        (например, самиздат).
         Необходимые поля: +title
         Дополнительные поля: +author, howpublished, address, month, +year, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
-    elif item["bibtex_type"] == 'conference' or item["bibtex_type"] == 'inproceedings':
+    elif item["publication_type"] in (
+        "proceedings-article",
+    ):
+        #  'conference' or item["publication_type"] == 'inproceedings':
         '''
         Синоним inproceedings, оставлено для совместимости с Scribe.
         Необходимые поля: +author, +title, +booktitle, +year
         Дополнительные поля: editor, +pages, organization, +publisher, address, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
-        bibtex.append(f"""booktitle = {op}{item["bibtex_venue_name"]}{cp}""")
+        bibtex.append(f"""booktitle = {op}{item["venue_full_name"]}{cp}""")
         if item["page_first"]: bibtex.append(f"""pages = {op}{item["page_first"]}-{item["page_last"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""publisher = {op}{item["publisher"]}{cp}""")
 
-    elif item["bibtex_type"] == 'inbook':
+    elif item["publication_type"] in (
+        "book-section",
+        "book-part",
+        "book-chapter",
+    ): 
+        # 'inbook':
         '''
         Часть книги, возможно без названия. Может быть главой (частью, параграфом), либо диапазоном страниц.
         Необходимые поля: +author/editor, +title, +chapter/pages, +publisher, +year
         Дополнительные поля: +volume, series, address, edition, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
         if item["volume"]: bibtex.append(f"""volume = {op}{item["volume"]}{cp}""")
         if item["page_first"]: bibtex.append(f"""pages = {op}{item["page_first"]}-{item["page_last"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""publisher = {op}{item["publisher"]}{cp}""")
 
-    elif item["bibtex_type"] == 'incollection':
+    elif item["publication_type"] == 'incollection':
         '''
         Часть книги, имеющая собственное название (например, статья в сборнике).
         Необходимые поля: +author, +title, +booktitle, +year
         Дополнительные поля: editor, +pages, organization, +publisher, address, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
-        bibtex.append(f"""booktitle = {op}{item["bibtex_venue_name"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
+        bibtex.append(f"""booktitle = {op}{item["venue_full_name"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""publisher = {op}{item["publisher"]}{cp}""")
         if item["page_first"]: bibtex.append(f"""pages = {op}{item["page_first"]}-{item["page_last"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
-    elif item["bibtex_type"] == 'manual':
+    elif item["publication_type"] == 'standard-series':
         '''
         Техническая документация.
         Необходимые поля: +title
         Дополнительные поля: +author, +organization, address, edition, month, +year, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""organization = {op}{item["publisher"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
-    elif item["bibtex_type"] == 'mastersthesis':
+    elif item["publication_type"] == 'dissertation':
         '''
-        Магистерская диссертация.
+         диссертация.
         Необходимые поля: +author, +title, +school, +year
         Дополнительные поля: address, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""school = {op}{item["publisher"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
-    elif item["bibtex_type"] == 'misc':
-        '''
-        Использовать, если другие типы не подходят.
-        Необходимые поля: none
-        Дополнительные поля: +author, +title, howpublished, month, +year, note, key
-        '''
-        bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
-        bibtex.append(f"""year = {op}{item["year"]}{cp}""")
-
-    elif item["bibtex_type"] == 'phdthesis':
-        '''
-        Кандидатская диссертация.
-        Необходимые поля: +author, +title, +school, +year
-        Дополнительные поля: address, month, note, key
-        '''
-        bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
-        if item["publisher"]: bibtex.append(f"""school = {op}{item["publisher"]}{cp}""")
-        bibtex.append(f"""year = {op}{item["year"]}{cp}""")
-
-    elif item["bibtex_type"] == 'proceedings':
+    elif item["publication_type"] in ("proceedings", "proceedings-series"):
         '''
         Сборник трудов (тезисов) конференции.
         Необходимые поля: +title, +year
         Дополнительные поля: +editor, +publisher, organization, address, month, note, key
         '''
         bibtex.append(f"""editor = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""publisher = {op}{item["publisher"]}{cp}""")
 
-    elif item["bibtex_type"] == 'techreport':
+    elif item["publication_type"] == "report":
         '''
         Отчёт, опубликованный организацией, обычно пронумерованный внутри серии.
         Необходимые поля: +author, +title, +institution, +year
         Дополнительные поля: type, number, address, month, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         if item["publisher"]: bibtex.append(f"""institution = {op}{item["publisher"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
 
-    elif item["bibtex_type"] == 'unpublished':
+    else: # item["publication_type"] == "other":
         '''
-        Документ, имеющий автора и название, но формально не опубликованный (рукопись).
-        Необходимые поля: +author, +title, +note
-        Дополнительные поля: month, +year, key
+        Использовать, если другие типы не подходят.
+        Необходимые поля: none
+        Дополнительные поля: +author, +title, howpublished, month, +year, note, key
         '''
         bibtex.append(f"""author = {op}{authors}{cp}""")
-        bibtex.append(f"""title = {op}{item["title_raw"]}{cp}""")
+        bibtex.append(f"""title = {op}{item["title"]}{cp}""")
         bibtex.append(f"""year = {op}{item["year"]}{cp}""")
-        bibtex.append(f"""note = {op}{item["abstract"]}{cp}""")
+
 
     bibtex = ",\n".join(bibtex)
     bibtex += f"""{cp}"""

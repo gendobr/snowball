@@ -21,8 +21,8 @@ def do_spc(config=None,
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '008_search_path_count.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('008_search_path_count', 'log_file_name'))
+
 
     def log(msg):
         s = json.dumps(msg)
@@ -34,8 +34,9 @@ def do_spc(config=None,
 
     # =========
 
-    max_citation_net_nodes = conf.getint('main', 'max_citation_net_nodes')
-    n_top_paths = conf.getint('main', 'n_top_paths');
+    max_citation_net_nodes = conf.getint('008_search_path_count', 'max_citation_net_nodes')
+    n_top_paths = conf.getint('008_search_path_count', 'n_top_paths');
+    min_year = conf.getint('008_search_path_count', 'min_year');
 
     # =====================================================
     # load downloaded items
@@ -110,7 +111,7 @@ def do_spc(config=None,
             item_id = spc.__paper_of(str(item_id))
             if item_id in items:
                 item = items[item_id]
-                if item['year'] < 2010:
+                if item['year'] < min_year:
                     continue
                 item['spc'] = spc_weight
                 log(('id', item['id'], 'spc', item['spc'], 'year', item['year'], 'title', item['title']))

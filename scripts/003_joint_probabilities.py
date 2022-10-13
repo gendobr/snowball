@@ -16,8 +16,7 @@ def joint_probabilities(config=None, outfile=None, infile=None, indictfile=None)
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '003_joint_probabilities.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('003_joint_probabilities', 'log_file_name'))
 
     def log(msg):
         s = json.dumps(msg)

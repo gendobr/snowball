@@ -8,6 +8,26 @@ import psutil
 import scholarly
 import sys, traceback, random, json
 
+def get_optional(
+    path,
+    tree,
+    default_value=None,
+):
+    """
+    Extract branch from tree using path
+    """
+    if tree is None:
+        return default_value
+    res = tree
+    for p in path:
+        try:
+            res = res[p]
+        except (TypeError, IndexError, KeyError):
+            return default_value
+    if res is None:
+        return default_value
+    return res
+
 
 def do_extension(config=None, outfile=None, initems=None, searchauthor='1', searchtitle='1', searchvenue='0'):
     t0 = time.time()
@@ -19,8 +39,8 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     save_period = int(conf.get('main', 'save_period'))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '010_extend_items_google_scholar.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('009_extend_items_google_scholar', 'log_file_name'))
+
 
     def log(msg):
         s = json.dumps(msg)
@@ -35,7 +55,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     if outfile:
         file_path_output = outfile
     else:
-        file_path_output = f'{data_dir}/010_extend_items_google_scholar.jsonl'
+        file_path_output = f'{data_dir}/009_extend_items_google_scholar.jsonl'
     log(('output', file_path_output))
     # =====================================================
 
@@ -59,7 +79,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
 
     # place here Google Scholar calls to extract citation index
     # ! maybe proxy is needed
-    proxy = conf.get('google_scholar', 'proxy')
+    proxy = conf.get('009_extend_items_google_scholar', 'proxy')
     if proxy and len(proxy) > 0:
         pg = scholarly.ProxyGenerator()
         pg.SingleProxy(http = proxy)
@@ -83,9 +103,9 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
             log(('skip', 'item_id', item_id, ))
             continue
 
-        if random.random() > 0.7:
-            log(('dropout', 'item_id', item_id, ))
-            continue
+        # if random.random() > 1.0:
+        #     log(('dropout', 'item_id', item_id, ))
+        #     continue
 
         google_search_string = list()
         if searchtitle == '1':
@@ -126,22 +146,7 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
                     break
 
             if pub:
-                try:
-                    bibtex = pub.bibtex
-                except:
-                    bibtex = ""
-                items[item_id]['google_scholar'] = dict(
-                    abstract=pub.bib['abstract'] if 'abstract' in pub.bib else '',
-                    author=pub.bib['author'] if 'author' in pub.bib else '',
-                    cites=pub.bib['cites'] if 'cites' in pub.bib else '',
-                    eprint=pub.bib['eprint'] if 'eprint' in pub.bib else '',
-                    gsrank=pub.bib['gsrank'] if 'gsrank' in pub.bib else '',
-                    title=pub.bib['title'] if 'title' in pub.bib else '',
-                    url=pub.bib['url'] if 'url' in pub.bib else '',
-                    venue=pub.bib['venue'] if 'venue' in pub.bib else '',
-                    year=pub.bib['year'] if 'year' in pub.bib else '',
-                    bibtex=bibtex,
-                )
+                items[item_id]['google_scholar'] = get_optional(["bib"], pub, {}),
                 log(items[item_id]['google_scholar'])
                 n_errors = 0
             time.sleep((30-5)*random.random()+5) #from 5 to 30 seconds

@@ -16,8 +16,8 @@ def do_ssnmf(config=None, outfile=None, infile=None, outptmfile=None):
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '006_SSNMF.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('006_SSNMF', 'log_file_name'))
+
 
     def log(msg):
         s = json.dumps(msg)
@@ -51,8 +51,7 @@ def do_ssnmf(config=None, outfile=None, infile=None, outptmfile=None):
     # ===============================================================
 
     # read configuration file
-    p_max = conf.getint('main', 'Pmax')
-    lam = conf.getfloat('main', 'lambda')
+    p_max = conf.getint('006_SSNMF', 'Pmax')
 
     j_prob_reduced = numpy.load(file_path_input)
     log(("len(j_prob_reduced)=", len(j_prob_reduced)))
@@ -60,12 +59,12 @@ def do_ssnmf(config=None, outfile=None, infile=None, outptmfile=None):
     topic_model = tm.Model(data_dir)
 
     params = {
-        'maxIterations': 50,
-        'lambda': lam,
-        'eta': 0.1,
-        'beta': 0.99,
-        'beta2': 1.000,
-        'maxError': 1e-7,
+        'maxIterations': conf.getint('006_SSNMF', 'maxIterations'),
+        'lambda': conf.getfloat('006_SSNMF', 'lambda'),
+        'eta': conf.getfloat('006_SSNMF', 'eta'),
+        'beta': conf.getfloat('006_SSNMF', 'beta'),
+        'beta2': conf.getfloat('006_SSNMF', 'beta2'),
+        'maxError': conf.getfloat('006_SSNMF', 'maxError'),
     }
 
     for i in range(0, 20):

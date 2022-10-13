@@ -1,6 +1,6 @@
 #!/bin/sh
-ddr=../data/$1
-pipenv run python \
+ddr=../data/openalex-test
+poetry run python \
    004_stopwords.py --config=$ddr/config.ini \
                     --infile=$ddr/003_joint_probabilities.npy \
                     --outfile=$ddr/004_stopwords_output.jsonl \
