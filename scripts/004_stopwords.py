@@ -16,8 +16,8 @@ def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddict
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '004_stopwords.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('004_stopwords', 'log_file_name'))
+
 
     def log(msg):
         s = json.dumps(msg)
@@ -60,7 +60,7 @@ def stopwords(config=None, outfile=None, infile=None, dictfile=None, reduceddict
     with jsonlines.open(file_path_dict) as reader:
         topic_model.set_word_dictionary({row[0]: row[1] for row in reader})
 
-    Hmax = conf.getfloat('main', 'Hmax')
+    Hmax = conf.getfloat('004_stopwords', 'Hmax')
 
     cooccurrence_probability = numpy.load(file_path_input)
 

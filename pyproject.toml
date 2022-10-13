@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "snowball-exploratory-search"
+version = "0.1.0"
+description = ""
+authors = ["<gen.dobr@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+nltk = "^3.7"
+numpy = "^1.23.3"
+networkx = "^2.8.7"
+pandas = "^1.5.0"
+matplotlib = "^3.6.0"
+scipy = "^1.9.1"
+fire = "^0.4.0"
+jsonlist = "^0.1.0"
+jsonlines = "^3.1.0"
+scholarly = "^1.7.2"
+free-proxy = "^1.0.6"
+openpyxl = "^3.0.10"
+textract = "^1.6.5"
+pyahocorasick = "^1.4.4"
+psutil = "^5.9.2"
+PyMuPDF = "^1.20.2"
+ftfy = "^6.1.1"
+
+[tool.poetry.dev-dependencies]
+pep8-naming = "0.13.*"
+flake8 = "5.0.*"
+poethepoet = "0.16.*"
+pytest = "7.*"
+pytest-sugar = "0.9.*"
+pytest-asyncio = "0.19.*"
+pytest-snapshot = "0.9.*"
+grpcio-tools = "1.49.*"
+mypy = "0.971"
+mypy-protobuf = "3.3.*"
+black = "22.8.*"
+
+[tool.poe.tasks]
+format = "black ."
+test = "pytest"
+
+[tool.pytest.ini_options]
+addopts = "-p no:warnings"
+filterwarnings = [
+  "error"
+]

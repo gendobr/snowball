@@ -4,7 +4,7 @@
 # import sys
 import os.path
 import os
-from lib.msacademic import Api
+from lib.openalex import Api
 import time
 import fire
 import configparser
@@ -35,8 +35,7 @@ def snowball(config=None,
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '007_restricted_snowball.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+    log_file_path = os.path.join(data_dir, conf.get('007_restricted_snowball', 'log_file_name'))
 
     def log(msg):
         s = json.dumps(msg)
@@ -48,13 +47,10 @@ def snowball(config=None,
 
     # =========
 
-    rest_endpoint = json.loads(conf.get('msacademic', 'restEndpoint'))
-    subscription_key = conf.get('msacademic', 'subscriptionKey')
-    include_topics = json.loads(conf.get('msacademic', 'msAcademicIncludeTopicsIds'))
-    exclude_topics = json.loads(conf.get('msacademic', 'msAcademicExcludeTopicsIds'))
-    max_distance = conf.getfloat('main', 'maxDistance')
-
-    measure = conf.get('main', 'measure')
+    include_topics = json.loads(conf.get('openalex', 'openalexIncludeTopicsIds'))
+    exclude_topics = json.loads(conf.get('openalex', 'openalexExcludeTopicsIds'))
+    max_distance = conf.getfloat('007_restricted_snowball', 'maxDistance')
+    measure = conf.get('007_restricted_snowball', 'measure')
     measure_types = {
         'kl': measures.kl_divergence,
         'skl': measures.skl_divergence,
@@ -67,12 +63,13 @@ def snowball(config=None,
         log(('undefines measure ', measure, 'available types are ', measure_types))
         exit()
 
-    api = Api(subscription_key, rest_endpoint, include_topics)
+    api = Api(include_topics)
 
     # =====================================================
     # load initial ids to queue
-    file_path_queued_ids = f'{data_dir}/007_restricted_snowball_queued_ids.csv'  # queued items
-    file_path_seed_ids = f'{data_dir}/in-seed.csv'  # seed item ids
+    file_path_queued_ids = os.path.join(data_dir, conf.get('007_restricted_snowball', 'file_path_queued_ids')) # queued items
+    file_path_seed_ids = os.path.join(data_dir, conf.get('007_restricted_snowball', 'file_path_seed_ids'))  # seed item ids
+
     log(('infile', infile))
     if infile and infile == 'resume' and os.path.isfile(file_path_queued_ids):
         file_path_initial_queued_ids = file_path_queued_ids
@@ -99,7 +96,7 @@ def snowball(config=None,
 
     # =====================================================
     # load known ids
-    file_path_known_ids = f'{data_dir}/007_restricted_snowball_known_ids.csv'  # items that were downloaded
+    file_path_known_ids = os.path.join(data_dir, conf.get('007_restricted_snowball', 'file_path_known_ids'))   # items that were downloaded
     known_ids = set()
     if infile and infile == 'resume' and os.path.isfile(file_path_known_ids):
         with open(file_path_known_ids, newline='') as csvfile:
@@ -113,7 +110,7 @@ def snowball(config=None,
 
     # =====================================================
     # load done ids
-    file_path_done_ids = f'{data_dir}/007_restricted_snowball_done_ids.csv'      # items that were in the queue
+    file_path_done_ids = os.path.join(data_dir, conf.get('007_restricted_snowball', 'file_path_done_ids'))   # items that were in the queue
     done_ids = set()
     if infile and infile == 'resume' and os.path.isfile(file_path_done_ids):
         with open(file_path_done_ids, newline='') as csvfile:
@@ -328,7 +325,7 @@ def snowball(config=None,
                        'of', len(known_ids),
                        "id", item['id'],
                        "dist", item['distance_to_seed'],
-                       "ECC=", item['ecc'],
+                       "citation_index=", item['citation_index'],
                        "year", item['year'],
                        "title", item['title'])
             else:
@@ -337,7 +334,7 @@ def snowball(config=None,
                        'of', len(known_ids),
                        "id", item['id'],
                        "dist", item['distance_to_seed'],
-                       "ECC=", item['ecc'],
+                       "citation_index=", item['citation_index'],
                        "year", item['year'],
                        "title", item['title'])
             log(msg)

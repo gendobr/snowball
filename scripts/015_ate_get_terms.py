@@ -37,7 +37,7 @@ def do_get_terms(config=None,
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '016_ate_get_terms.log'
+    log_file_name = '015_ate_get_terms.log'
     log_file_path = os.path.join(data_dir, log_file_name)
 
     def log(msg):

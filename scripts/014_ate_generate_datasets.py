@@ -31,7 +31,7 @@ def do_generate_datasets(config=None,
 
     data_dir = conf.get('main', 'data_dir')
 
-    log_file_name = '015_ate_generate_datasets.log'
+    log_file_name = '014_ate_generate_datasets.log'
     log_file_path = os.path.join(data_dir, log_file_name)
 
     def log(msg):

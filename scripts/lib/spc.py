@@ -167,12 +167,12 @@ def create_citation_net(items):
         node_1 = str(item['id'])
         if item['referenced_by'] and len(item['referenced_by']):
             for ref_id in item['referenced_by']:
-                node_2 = str(ref_id)
+                node_2 = str(ref_id).removeprefix('https://openalex.org/')
                 if node_2 in items:
                     citation_net.add_edge(node_2, node_1)
         if item['references_to'] and len(item['references_to']):
             for ref_id in item['references_to']:
-                node_2 = str(ref_id)
+                node_2 = str(ref_id).removeprefix('https://openalex.org/')
                 if node_2 in items:
                     citation_net.add_edge(node_1, node_2)
         # print i,node_1

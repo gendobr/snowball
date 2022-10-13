@@ -33,7 +33,7 @@ def do_clear_terms(config=None,
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '017_ate_clear_terms.log'
+    log_file_name = '016_ate_clear_terms.log'
     log_file_path = os.path.join(data_dir, log_file_name)
 
     def log(msg):

@@ -16,7 +16,7 @@ def do_clear_txt(config=None, rawtxtdir=None, cleartxtdir=None):
     conf.read_file(open(config))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '014_ate_clear_txt.log'
+    log_file_name = '013_ate_clear_txt.log'
     log_file_path = os.path.join(data_dir, log_file_name)
 
     def log(msg):

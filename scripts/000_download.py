@@ -1,9 +1,8 @@
-#!/usr/bin/env python2
 # encoding: UTF-8
 
 # import sys
 import os.path
-from lib.msacademic import Api
+from lib.openalex import Api
 import time
 import fire
 import configparser
@@ -21,17 +20,15 @@ def snowball(config=None, outfile=None, infile=None):
     conf = configparser.ConfigParser()
     conf.read_file(open(config))
 
-    rest_endpoint = json.loads(conf.get('msacademic', 'restEndpoint'))
-    subscription_key = conf.get('msacademic', 'subscriptionKey')
-    include_topics = json.loads(conf.get('msacademic', 'msAcademicIncludeTopicsIds'))
+    include_topics = json.loads(conf.get('openalex', 'openalexIncludeTopicsIds'))
 
-    api = Api(subscription_key, rest_endpoint, include_topics)
+    api = Api(include_topics)
 
     max_entries = int(conf.get('main', 'max_entries'))
 
     data_dir = conf.get('main', 'data_dir')
-    log_file_name = '000_download.log'
-    log_file_path = os.path.join(data_dir, log_file_name)
+
+    log_file_path = os.path.join(data_dir, conf.get('000_download', 'log_file_name'))
 
     def log(msg):
         s = json.dumps(msg)
@@ -42,10 +39,10 @@ def snowball(config=None, outfile=None, infile=None):
         f.close()
 
     # file names
-    file_path_queued_ids = f'{data_dir}/000_download_queued_ids.csv'
-    file_path_known_ids = f'{data_dir}/000_download_known_ids.csv'
-    file_path_done_ids = f'{data_dir}/000_download_done_ids.csv'
-    file_path_seed_ids = f'{data_dir}/in-seed.csv'
+    file_path_queued_ids = os.path.join(data_dir, conf.get('000_download', 'file_path_queued_ids'))
+    file_path_known_ids = os.path.join(data_dir, conf.get('000_download', 'file_path_known_ids'))
+    file_path_done_ids = os.path.join(data_dir, conf.get('000_download', 'file_path_done_ids'))
+    file_path_seed_ids = os.path.join(data_dir, conf.get('000_download', 'file_path_seed_ids'))
 
     if outfile:
         file_path_output = outfile
@@ -84,7 +81,6 @@ def snowball(config=None, outfile=None, infile=None):
                 item_id = str(row[0])
                 queued_ids_set.add(item_id)
                 done_ids.add(item_id)
-    # /load done ids
     # =====================================================
 
     # =====================================================
@@ -95,7 +91,6 @@ def snowball(config=None, outfile=None, infile=None):
             queue_reader = csv.reader(csvfile, delimiter="\t", quotechar='"')
             for row in queue_reader:
                 known_ids.add(str(row[0]))
-    # /load done ids
     # =====================================================
 
     # =====================================================
@@ -120,8 +115,9 @@ def snowball(config=None, outfile=None, infile=None):
 
         done_ids.update(next_batch_ids)
 
-        items = api.load_by_ids(next_batch_ids)
-        items.extend(api.load_by_rids(next_batch_ids))
+        items = api.load_by_ids(next_batch_ids, verbose=False)
+        items.extend(api.load_by_rids(next_batch_ids, verbose=False))
+
         api_call_counter += 2
         log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize()))
         for item in items:
