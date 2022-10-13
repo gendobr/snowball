@@ -1,6 +1,7 @@
 #!/bin/sh
+ddr=../data/$1
 pipenv run python \
-   001_tokenizer.py --config=../data/GAN/config.ini \
-                    --infile=../data/GAN/000_download_output.jsonl \
-                    --outfile=../data/GAN/001_tokenizer_output.jsonl\
-                    --outdictfile=../data/GAN/001_tokenizer_dict.jsonl
+   001_tokenizer.py --config=$ddr/config.ini \
+                    --infile=$ddr/000_download_output.jsonl \
+                    --outfile=$ddr/001_tokenizer_output.jsonl\
+                    --outdictfile=$ddr/001_tokenizer_dict.jsonl

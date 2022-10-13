@@ -1,5 +1,6 @@
 #!/bin/sh
+ddr=../data/$1
 pipenv run python \
-   014_ate_clear_txt.py --config=../data/GAN/config.ini \
-                   --rawtxtdir=../data/GAN/txts \
-                   --cleartxtdir=../data/GAN/clear_txts
+   014_ate_clear_txt.py --config=$ddr/config.ini \
+                   --rawtxtdir=$ddr/txts \
+                   --cleartxtdir=$ddr/clear_txts
