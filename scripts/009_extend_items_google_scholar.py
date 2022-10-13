@@ -6,6 +6,7 @@ import configparser
 import jsonlines
 import psutil
 import scholarly
+from scholarly import ProxyGenerator
 import sys, traceback, random, json
 
 def get_optional(
@@ -82,7 +83,9 @@ def do_extension(config=None, outfile=None, initems=None, searchauthor='1', sear
     proxy = conf.get('009_extend_items_google_scholar', 'proxy')
     if proxy and len(proxy) > 0:
         pg = scholarly.ProxyGenerator()
-        pg.SingleProxy(http = proxy)
+        http = proxy if 'http://' in proxy else None
+        https = proxy if 'https://' in proxy else None
+        pg.SingleProxy(http=http, https=https)
         scholarly.scholarly.use_proxy(pg)
     else:
         pg = scholarly.ProxyGenerator()
