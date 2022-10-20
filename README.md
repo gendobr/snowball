@@ -44,7 +44,7 @@ You can use one of proxy services listed at
    ```
 
 5) Find 10 - 20 seed publications in the
-   [openalex.org](https://explore.openalex.org/).
+   [explore.openalex.org](https://explore.openalex.org/).
 
    Each seed publication should be
    * be relevant to your search topic
