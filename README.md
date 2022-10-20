@@ -81,7 +81,7 @@ Final list of publications is the file `011_exported.xlsx` that is `--outfile` p
 in the `011_export_xlsx.sh` script.
 
 
-7) Optionally, you can extended pipeline with ATE step
+7) Optionally, you can extende the pipeline with ATE step
 - `012_ate_pdf2txt.sh` - extract plain text from PDF files
 - `013_ate_clear_txt.sh` - clear extracted texts
 - `014_ate_generate_datasets.sh` - join extracted texts in the sequence of datasets
