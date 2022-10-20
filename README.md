@@ -23,7 +23,7 @@ You can use one of proxy services listed at
    ```
    data  - empty directory to place your data  
    docs  - place to additinal documentation
-   Pipfile  - list of required packages
+   pyproject.toml  - list of required packages
    README.md - this file
    scripts - python code
    ```
