@@ -1,6 +1,13 @@
 # snowball
-Set of python scripts to implement the controlled snowball sampling to gather collection of the seminal scientific publications on desired subject. Details of the approach are available in the
-[publications](https://scholar.google.com/citations?user=bNlVvTEAAAAJ&hl=ru&oi=sra) and [publications](https://scholar.google.com/citations?hl=ru&user=vaOHuLQAAAAJ&view_op=list_works&sortby=pubdate) 
+Set of python scripts to implement the controlled snowball sampling to gather collection of the seminal scientific publications on desired subject. Details of the approach are available in 
+
+* Dobrovolskyi, H., Keberle, N., Todoriko, O. (2017). Probabilistic Topic Modelling for Controlled Snowball Sampling in Citation Network Collection. In: Różewski, P., Lange, C. (eds) Knowledge Engineering and Semantic Web. KESW 2017. Communications in Computer and Information Science, vol 786. Springer, Cham. https://doi.org/10.1007/978-3-319-69548-8_7
+* Dobrovolskyi, Hennadii, and Nataliya Keberle. "Collecting the Seminal Scientific Abstracts with Topic Modelling, Snowball Sampling and Citation Analysis." ICTERI. 2018.
+* Dobrovolskyi, H., & Keberle, N. (2018, May). On convergence of controlled snowball sampling for scientific abstracts collection. In International Conference on Information and Communication Technologies in Education, Research, and Industrial Applications (pp. 18-42). Springer, Cham.
+* Kosa, V., Chaves-Fraga, D., Dobrovolskyi, H., Fedorenko, E., & Ermolayev, V. (2019). Optimizing Automated Term Extraction for Terminological Saturation Measurement. ICTERI, 1, 1-16.
+* Kosa, V., Chaves-Fraga, D., Dobrovolskyi, H., & Ermolayev, V. (2019, June). Optimized term extraction method based on computing merged partial C-values. In International Conference on Information and Communication Technologies in Education, Research, and Industrial Applications (pp. 24-49). Springer, Cham.
+* Dobrovolskyi, H., & Keberle, N. (2020). Obtaining the Minimal Terminologically Saturated Document Set with Controlled Snowball Sampling. In ICTERI (pp. 87-101).
+
 
 Requirements:
 To run the package you need 
