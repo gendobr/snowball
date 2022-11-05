@@ -115,13 +115,14 @@ def snowball(config=None, outfile=None, infile=None):
 
         done_ids.update(next_batch_ids)
 
-        items = api.load_by_ids(next_batch_ids, verbose=False)
-        items.extend(api.load_by_rids(next_batch_ids, verbose=False))
+        items = api.load_by_ids(next_batch_ids, verbose=True)
+        items.extend(api.load_by_rids(next_batch_ids, verbose=True))
 
         api_call_counter += 2
         log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize()))
         for item in items:
             entry_id = str(item['id'])
+            print(entry_id)
             if entry_id in known_ids:
                 continue
 

@@ -9,7 +9,7 @@ import time
 import jsonlines
 import json
 import re
-
+import codecs
 
 
 
@@ -145,14 +145,20 @@ def __sort_citation_desc(txt_file_dir, metadata=False):
 def __sort_spc_desc(txt_file_dir, metadata=False):
     t0 = time.time()
     # read metadata file
-    with jsonlines.open(metadata) as reader:
-        items = {str(row['id']): row for row in reader}
+    if metadata[-6:] == '.jsonl':
+        with jsonlines.open(metadata) as reader:
+            items = {str(row['id']): row for row in reader}
+
+    elif metadata[-5:] == '.xlsx':
+        rows = json.loads(pd.read_excel(metadata).to_json(orient="records"))
+        items = {str(row['ID']): row for row in rows}
+
 
     # get pairs (citation_index, file_path)
     pairs = []
     for item_id in items:
         item = items[item_id]
-        txt_file_path = join(txt_file_dir, re.sub(r'\.pdf$', '.txt', item["pdf_file_name"]))
+        txt_file_path = join(txt_file_dir, re.sub(r'\.pdf$', '.txt', item["Document file name"]))
         if isfile(txt_file_path):
             try:
                 order_by = float(item["spc"])

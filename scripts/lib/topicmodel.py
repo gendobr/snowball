@@ -87,7 +87,12 @@ class Model:
         # =============================================
         norma = 1.0 / norma
         print(('norma', norma))
-        return cooccurrence_probability * norma
+        # for i in range(0,self.word_dictionary_size):
+        #     for j in range(0,self.word_dictionary_size):
+        #        if random.random() < 0.0001:
+        #              print("normalize", i, j)
+        #        cooccurrence_probability[i][j] *= norma  
+        return cooccurrence_probability*norma
 
     def word_probability(self, cooccurrence_probability):
 

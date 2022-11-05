@@ -21,8 +21,11 @@ class Api:
 
     def load_by_ids(self, entry_ids, verbose=False):
         restrict_ids = "ids.openalex:" + ('|'.join([self.short_id(x) for x in entry_ids]))
-        restrict_topics = "concepts.id:" + ("|".join([self.short_id(x) for x in self.include_topics]))
-        res = self.call_api(f"filter={restrict_ids},{restrict_topics}", verbose)
+        if len(self.include_topics)>0:
+            restrict_topics = ",concepts.id:" + ("|".join([self.short_id(x) for x in self.include_topics]))
+        else:
+            restrict_topics = ""
+        res = self.call_api(f"filter={restrict_ids}{restrict_topics}", verbose)
         return res
 
 
@@ -32,8 +35,11 @@ class Api:
 
     def load_by_rids(self, entry_ids, verbose=False):
         restrict_ids = "cites:" + ('|'.join([self.short_id(x) for x in entry_ids]))
-        restrict_topics = "concepts.id:" + ("|".join([self.short_id(x) for x in self.include_topics]))
-        res = self.call_api(f"filter={restrict_ids},{restrict_topics}", verbose)
+        if len(self.include_topics)>0:
+            restrict_topics = ",concepts.id:" + ("|".join([self.short_id(x) for x in self.include_topics]))
+        else:
+            restrict_topics = ""
+        res = self.call_api(f"filter={restrict_ids}{restrict_topics}", verbose)
         return res
 
 
@@ -41,7 +47,9 @@ class Api:
         time.sleep(0.11)
         res = []
         url = f'{self.rest_endpoint}/works?{query}'
-        response = requests.get(url).json()
+        print(url)
+        r = requests.get(url)
+        response = r.json()
         if verbose: print(f"url = '{url}'")
         try:
             entities = get_optional(['results'], response, [])

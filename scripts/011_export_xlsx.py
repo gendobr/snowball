@@ -1,5 +1,6 @@
 # import sys
 import os.path
+import os
 import time
 import fire
 import configparser
@@ -168,11 +169,10 @@ def do_export(config=None, outfile=None, initems=None):
 
         #         'Citations (GS)',           # U The citation count for the document acquired from Google Scholar
         citations = 0
-        if "google_scholar" in item:
-            try:
-                citations = int(item["google_scholar"][0]["cites"])
-            except:
-                pass
+        try:
+            citations = item['raw']['cited_by_count']
+        except:
+            pass
         flat_item.append(citations)
 
         # 'Citations per year (GS)', # V This is the citation frequency we need for document ordering. The
@@ -194,7 +194,10 @@ def do_export(config=None, outfile=None, initems=None):
         flat_item.append(item.get("pdf_url"))
 
         #         'Full text available'
-        flat_item.append(item.get("pdf_present"))
+        pdf_file_name = f'{data_dir}/pdfs/{item.get("pdf_file_name")}'
+        pdf_present = os.path.exists(pdf_file_name)
+        print(pdf_present, pdf_file_name)
+        flat_item.append(os.path.exists(pdf_file_name))
 
         rows.append(flat_item)
 

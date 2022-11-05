@@ -221,7 +221,11 @@ def snowball(config=None,
         json_batch = []
         next_batch_ids = []
         if len(seed_items) == 0:
-            next_batch_ids.extend([x for x in seed_ids if x not in seed_items])
+            next_batch_ids.extend([x for x in seed_ids])
+            for item_id in next_batch_ids[batch_size:]:
+                queued_ids_set.add(item_id)
+                queued_ids.put(item_id)
+            next_batch_ids = next_batch_ids[:batch_size]
             log(('seed_ids=>next_batch_ids', next_batch_ids))
         else:
             try:
@@ -238,8 +242,8 @@ def snowball(config=None,
 
         done_ids.update(next_batch_ids)
 
-        items = api.load_by_ids(next_batch_ids, verbose=False)
-        items.extend(api.load_by_rids(next_batch_ids, verbose=False))
+        items = api.load_by_ids(next_batch_ids, verbose=True)
+        items.extend(api.load_by_rids(next_batch_ids, verbose=True))
         api_call_counter += 2
         log(('api_call_counter', api_call_counter, 'queue_size', queued_ids.qsize(), 'items', len(items)))
         n_known_items = 0
