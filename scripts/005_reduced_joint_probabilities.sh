@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/graphdb
 poetry run python \
    003_joint_probabilities.py --config=$ddr/config.ini \
                     --infile=$ddr/001_tokenizer_output.jsonl \

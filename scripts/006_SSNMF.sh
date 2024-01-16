@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/graphdb
 poetry run python \
    006_SSNMF.py --config=$ddr/config.ini \
                    --outfile=$ddr/006_ssnmf_output.npy \

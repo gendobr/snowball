@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/graphdb
 poetry run python \
    007_restricted_snowball.py --config=$ddr/config.ini \
                    --outfile=$ddr/007_restricted_snowball_output.jsonl \

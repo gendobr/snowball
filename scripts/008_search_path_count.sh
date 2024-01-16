@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/graphdb
 poetry run python \
    008_search_path_count.py --config=$ddr/config.ini \
                    --outfile=$ddr/008_search_path_count_output.jsonl \

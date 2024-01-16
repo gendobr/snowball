@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/graphdb
 poetry run python \
    004_stopwords.py --config=$ddr/config.ini \
                     --infile=$ddr/003_joint_probabilities.npy \

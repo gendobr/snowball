@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/bim
 poetry run python \
    011_export_xlsx.py --config=$ddr/config.ini \
                    --outfile=$ddr/011_exported.xlsx \

@@ -1,5 +1,5 @@
 #!/bin/sh
-ddr=../data/openalex-test
+ddr=../data/bim
 poetry run python \
    015_ate_get_terms.py \
        --config=$ddr/config.ini \
